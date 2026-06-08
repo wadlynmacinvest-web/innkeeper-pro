@@ -1,0 +1,58 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: static/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: static
+        run: npm install
+
+      - name: Prepare Web Directory
+        working-directory: static
+        run: |
+          mkdir -p www
+          cp index.html www/
+
+      - name: Capacitor Sync
+        working-directory: static
+        run: npx cap sync android
+
+      - name: Build Android APK (Debug)
+        working-directory: static/android
+        run: ./gradlew assembleDebug
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/heads/')
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: static/android/app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

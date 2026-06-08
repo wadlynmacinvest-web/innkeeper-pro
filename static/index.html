@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InnKeeper Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--navy2:#253358;--cream:#fdf8f0;--warm:#f5ede0;
+  --gold:#c9a84c;--gold2:#e8c96d;--gold-pale:#fdf4df;
+  --teal:#2d7a7a;--teal2:#3d9e9e;--teal-pale:#e6f4f4;
+  --rose:#d4726a;--rose-pale:#fdf0ef;
+  --sage:#4a8a5a;--sage-pale:#edf6ef;
+  --lavender:#7c6bb5;--lav-pale:#f0edf8;
+  --border:#e8dfd0;--text:#2c2420;--text2:#5a5250;--text3:#9a9290;
+  --white:#fff;--shadow:0 4px 20px rgba(26,39,68,.08);--shadow2:0 2px 10px rgba(26,39,68,.06);
+  --r:14px;--rs:9px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden;}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;background:linear-gradient(180deg,var(--navy) 0%,#1e2e50 100%);z-index:100;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(26,39,68,.25);}
+.sb-logo{padding:24px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo-name{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--gold2);}
+.sb-logo-sub{font-size:.65rem;color:rgba(255,255,255,.3);letter-spacing:.12em;text-transform:uppercase;margin-top:2px;}
+.sb-hotel{padding:12px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-hotel-name{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.7);}
+.sb-hotel-loc{font-size:.65rem;color:rgba(255,255,255,.3);}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.sb-section{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:10px 10px 5px;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;margin-bottom:2px;color:rgba(255,255,255,.55);font-size:.83rem;font-weight:500;transition:all .2s;}
+.nav-link:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);}
+.nav-link.active{background:rgba(201,168,76,.2);color:var(--gold2);font-weight:600;}
+.nav-link .ni{font-size:1rem;width:18px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--rose);color:#fff;font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.nav-badge.gold{background:var(--gold);color:var(--navy);}
+.sb-footer{padding:14px 10px;border-top:1px solid rgba(255,255,255,.07);}
+.sb-user{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;cursor:pointer;}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal2));display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;}
+.sb-uname{font-size:.78rem;color:#fff;font-weight:600;}
+.sb-urole{font-size:.62rem;color:rgba(255,255,255,.35);}
+#main{margin-left:230px;min-height:100vh;display:flex;flex-direction:column;}
+#topbar{background:var(--white);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:60;box-shadow:0 1px 8px rgba(26,39,68,.05);}
+.tb-left h1{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--navy);}
+.tb-left p{font-size:.68rem;color:var(--text3);margin-top:1px;}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-search{display:flex;align-items:center;gap:7px;background:var(--cream);border:1.5px solid var(--border);border-radius:9px;padding:7px 13px;width:200px;}
+.tb-search input{border:none;background:transparent;outline:none;font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--text);width:100%;}
+.icon-btn{width:36px;height:36px;border-radius:9px;background:var(--cream);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;position:relative;}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--rose);border:2px solid var(--white);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-primary{background:var(--gold);color:var(--navy);}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn-teal{background:var(--teal);color:#fff;}
+.btn-teal:hover{background:var(--teal2);}
+.btn-navy{background:var(--navy);color:#fff;}
+.btn-outline{background:transparent;color:var(--text2);border:1.5px solid var(--border);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-ghost{background:var(--warm);color:var(--text2);border:1.5px solid var(--border);}
+.btn-rose{background:var(--rose);color:#fff;}
+.btn-sm{padding:5px 12px;font-size:.74rem;}
+.btn-xs{padding:3px 9px;font-size:.68rem;border-radius:6px;}
+#content{flex:1;padding:26px 28px;}
+.page{display:none;animation:fadeUp .3s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.panel{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);box-shadow:var(--shadow2);overflow:hidden;}
+.panel-header{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;color:var(--navy);}
+.panel-sub{font-size:.68rem;color:var(--text3);margin-top:2px;}
+.panel-body{padding:18px 20px;}
+.view-all{font-size:.72rem;color:var(--teal);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif;}
+.stat-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:18px 20px;box-shadow:var(--shadow2);position:relative;overflow:hidden;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sc-gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.sc-teal::before{background:linear-gradient(90deg,var(--teal),var(--teal2));}
+.sc-rose::before{background:linear-gradient(90deg,var(--rose),#e8a09a);}
+.sc-sage::before{background:linear-gradient(90deg,var(--sage),#6aaa7a);}
+.sc-lav::before{background:linear-gradient(90deg,var(--lavender),#a090d5);}
+.stat-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:10px;}
+.sc-gold .stat-icon{background:var(--gold-pale);}
+.sc-teal .stat-icon{background:var(--teal-pale);}
+.sc-rose .stat-icon{background:var(--rose-pale);}
+.sc-sage .stat-icon{background:var(--sage-pale);}
+.sc-lav .stat-icon{background:var(--lav-pale);}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--navy);line-height:1;}
+.stat-lbl{font-size:.72rem;color:var(--text3);margin-top:3px;}
+.stat-chg{font-size:.68rem;font-weight:600;margin-top:5px;}
+.chg-up{color:var(--sage);}
+.chg-dn{color:var(--rose);}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{text-align:left;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:9px 12px;border-bottom:1.5px solid var(--border);background:var(--warm);}
+.data-table td{padding:11px 12px;font-size:.8rem;border-bottom:1px solid rgba(232,223,208,.5);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(245,237,224,.4);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+.b-green{background:var(--sage-pale);color:var(--sage);}
+.b-green::before{background:var(--sage);}
+.b-teal{background:var(--teal-pale);color:var(--teal);}
+.b-teal::before{background:var(--teal);}
+.b-gold{background:var(--gold-pale);color:#a07820;}
+.b-gold::before{background:var(--gold);}
+.b-rose{background:var(--rose-pale);color:var(--rose);}
+.b-rose::before{background:var(--rose);}
+.b-lav{background:var(--lav-pale);color:var(--lavender);}
+.b-lav::before{background:var(--lavender);}
+.b-navy{background:rgba(26,39,68,.08);color:var(--navy);}
+.b-navy::before{background:var(--navy);}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;flex-shrink:0;}
+.name-cell{display:flex;align-items:center;gap:9px;}
+.nc-main{font-weight:600;color:var(--text);}
+.nc-sub{font-size:.68rem;color:var(--text3);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.g-auto{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;}
+.mb{margin-bottom:20px;}
+.room-map{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.rm-cell{border-radius:9px;padding:11px 8px;text-align:center;border:1.5px solid;cursor:pointer;transition:all .2s;}
+.rm-cell:hover{transform:scale(1.04);}
+.rmc-occupied{background:var(--teal-pale);border-color:var(--teal2);}
+.rmc-vacant{background:var(--sage-pale);border-color:#90c890;}
+.rmc-reserved{background:var(--lav-pale);border-color:#b0a0d8;}
+.rmc-maintenance{background:var(--rose-pale);border-color:var(--rose);}
+.rm-num{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;}
+.rmc-occupied .rm-num{color:var(--teal);}
+.rmc-vacant .rm-num{color:var(--sage);}
+.rmc-reserved .rm-num{color:var(--lavender);}
+.rmc-maintenance .rm-num{color:var(--rose);}
+.rm-type{font-size:.58rem;color:var(--text3);margin-top:1px;}
+.rm-guest{font-size:.62rem;font-weight:600;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.room-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.rl-item{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text2);}
+.rl-dot{width:9px;height:9px;border-radius:3px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group.full{grid-column:1/-1;}
+.flbl{font-size:.7rem;font-weight:700;color:var(--text2);}
+.finput,.fsel,.ftarea{padding:9px 13px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--cream);font-family:'Nunito',sans-serif;font-size:.83rem;color:var(--text);outline:none;transition:border-color .2s;}
+.finput:focus,.fsel:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,122,122,.1);}
+.finput::placeholder{color:var(--text3);}
+.ftarea{resize:vertical;min-height:72px;}
+.fdivider{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.overlay{position:fixed;inset:0;background:rgba(26,39,68,.55);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--white);border-radius:18px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(26,39,68,.2);transform:translateY(18px);transition:transform .25s;}
+.overlay.open .modal{transform:translateY(0);}
+.modal.modal-sm{width:440px;}
+.mhd{padding:20px 26px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mhd h3{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--navy);}
+.mclose{width:29px;height:29px;border-radius:7px;background:var(--cream);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.85rem;color:var(--text2);}
+.mclose:hover{background:var(--rose-pale);color:var(--rose);}
+.mbody{padding:22px 26px;}
+.mfoot{padding:14px 26px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+#toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:11px;font-size:.8rem;font-weight:600;box-shadow:0 8px 24px rgba(26,39,68,.25);z-index:999;transform:translateY(60px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:7px;}
+#toast.show{transform:translateY(0);opacity:1;}
+.prog-wrap{margin-top:6px;}
+.prog-labels{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text3);margin-bottom:5px;}
+.prog-track{height:7px;border-radius:4px;background:var(--warm);overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;}
+.act-item{display:flex;gap:11px;padding:9px 0;border-bottom:1px solid rgba(232,223,208,.5);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.act-text{font-size:.78rem;line-height:1.4;}
+.act-time{font-size:.65rem;color:var(--text3);margin-top:2px;}
+.celeb-card{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;margin-bottom:8px;border:1px solid;}
+.cc-bday{background:var(--gold-pale);border-color:rgba(201,168,76,.25);}
+.cc-anniv{background:var(--rose-pale);border-color:rgba(212,114,106,.2);}
+.cc-icon{font-size:1.25rem;flex-shrink:0;}
+.cc-name{font-size:.8rem;font-weight:600;}
+.cc-info{font-size:.67rem;color:var(--text3);margin-top:1px;}
+.cc-btn{margin-left:auto;padding:4px 10px;border-radius:6px;border:none;font-size:.67rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+.cc-bday .cc-btn{background:rgba(201,168,76,.18);color:#906018;}
+.cc-anniv .cc-btn{background:var(--rose-pale);color:var(--rose);}
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream);cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;}
+.qa-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.04);transform:translateY(-1px);}
+.qa-icon{font-size:1.4rem;}
+.qa-lbl{font-size:.7rem;font-weight:600;color:var(--text);text-align:center;}
+.celeb-full-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:16px 18px;margin-bottom:11px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow2);transition:all .2s;}
+.celeb-full-card:hover{transform:translateX(3px);border-color:var(--gold);}
+.cfc-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.cfc-bday{background:var(--gold-pale);}
+.cfc-anniv{background:var(--rose-pale);}
+.cfc-name{font-weight:700;font-size:.88rem;}
+.cfc-detail{font-size:.72rem;color:var(--text3);margin-top:2px;}
+.cfc-actions{margin-left:auto;display:flex;gap:7px;flex-shrink:0;}
+.cfc-date-badge{background:var(--warm);border-radius:7px;padding:4px 10px;font-size:.68rem;font-weight:700;color:var(--navy);text-align:center;margin-right:4px;}
+.cfc-date-badge .day{font-family:'Playfair Display',serif;font-size:1.1rem;display:block;}
+.msg-template{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow2);}
+.mt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.mt-title{font-weight:700;font-size:.85rem;color:var(--navy);}
+.mt-bday{background:var(--gold-pale);color:#906018;font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:20px;}
+.mt-anniv{background:var(--rose-pale);color:var(--rose);font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:20px;}
+.mt-body{background:var(--warm);border-radius:var(--rs);padding:14px 16px;font-size:.8rem;color:var(--text2);line-height:1.7;font-style:italic;}
+.mt-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+.celeb-hero{background:linear-gradient(135deg,#3a1a3a,#2a1a4a,#1a2a4a);border-radius:var(--r);padding:32px;margin-bottom:22px;position:relative;overflow:hidden;}
+.celeb-hero::before{content:'🎉🎂💍🎊';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:3.5rem;opacity:.15;}
+.ch-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#fff;margin-bottom:6px;}
+.ch-sub{font-size:.82rem;color:rgba(255,255,255,.45);}
+.ch-stats{display:flex;gap:24px;margin-top:18px;}
+.chs-item{text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:12px 18px;border:1px solid rgba(255,255,255,.1);}
+.chs-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold2);}
+.chs-lbl{font-size:.62rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.chart-bar-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cbi-lbl{font-size:.72rem;font-weight:600;color:var(--text2);width:60px;flex-shrink:0;text-align:right;}
+.cbi-track{flex:1;height:22px;background:var(--warm);border-radius:5px;overflow:hidden;}
+.cbi-fill{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:9px;font-size:.65rem;font-weight:700;}
+.cbi-val{font-size:.72rem;font-weight:700;color:var(--text2);width:52px;text-align:right;}
+.mini-chart{display:flex;align-items:flex-end;gap:4px;height:80px;padding-top:8px;}
+.mc-bar{flex:1;border-radius:4px 4px 0 0;min-height:6px;transition:height .6s ease;}
+.report-kpi{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:16px 18px;box-shadow:var(--shadow2);}
+.rk-lbl{font-size:.65rem;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+.rk-val{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--navy);}
+.rk-chg{font-size:.7rem;font-weight:600;margin-top:4px;}
+.settings-nav{display:flex;flex-direction:column;gap:3px;}
+.sn-item{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:500;color:var(--text2);transition:all .2s;border:none;background:transparent;font-family:'Nunito',sans-serif;width:100%;text-align:left;}
+.sn-item:hover{background:var(--warm);}
+.sn-item.active{background:var(--gold-pale);color:#906018;font-weight:700;}
+.settings-section{display:none;}
+.settings-section.active{display:block;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.sr-label{font-size:.83rem;font-weight:600;}
+.sr-desc{font-size:.7rem;color:var(--text3);margin-top:2px;}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:12px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.toggle input:checked+.toggle-slider{background:var(--teal);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);}
+.color-swatch{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.color-swatch.selected{border-color:var(--navy);transform:scale(1.15);}
+.color-row{display:flex;gap:8px;align-items:center;}
+/* Bookings hero */
+.booking-hero{background:linear-gradient(135deg,var(--navy) 0%,#253050 60%,#1a3030 100%);padding:44px 32px 38px;border-radius:var(--r);margin-bottom:22px;position:relative;overflow:hidden;}
+.booking-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(201,168,76,.12),transparent);}
+.bh-eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold2);margin-bottom:8px;}
+.bh-h1{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:#fff;line-height:1.15;margin-bottom:8px;}
+.bh-h1 em{color:var(--gold2);font-style:normal;}
+.bh-sub{font-size:.83rem;color:rgba(255,255,255,.45);margin-bottom:24px;}
+.search-widget{background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px 24px;max-width:700px;}
+.sw-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;}
+.sw-lbl{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:4px;}
+.sw-in,.sw-sel{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:9px 13px;color:#fff;font-family:'Nunito',sans-serif;font-size:.82rem;outline:none;width:100%;}
+.sw-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;padding:9px 22px;border:none;border-radius:8px;cursor:pointer;transition:all .2s;}
+.sw-btn:hover{transform:translateY(-1px);}
+.rooms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.room-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);box-shadow:var(--shadow2);overflow:hidden;transition:all .25s;}
+.room-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold);}
+.rc-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;}
+.rc-img.std{background:linear-gradient(135deg,#e6f4f4,#c8e8e8);}
+.rc-img.dlx{background:linear-gradient(135deg,#fdf4e0,#eedfc0);}
+.rc-img.ste{background:linear-gradient(135deg,#f4f0f8,#e0d8f0);}
+.rc-badge-abs{position:absolute;top:10px;left:10px;padding:2px 9px;border-radius:20px;font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.rcb-std{background:var(--teal-pale);color:var(--teal);}
+.rcb-dlx{background:var(--gold-pale);color:#906018;}
+.rcb-ste{background:var(--lav-pale);color:var(--lavender);}
+.rc-body{padding:14px 16px 16px;}
+.rc-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--navy);}
+.rc-desc{font-size:.72rem;color:var(--text3);margin-top:3px;line-height:1.5;}
+.rc-amenities{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0;}
+.amenity{font-size:.62rem;padding:2px 7px;border-radius:10px;background:var(--warm);color:var(--text2);font-weight:600;}
+.rc-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;margin-top:8px;}
+.rc-price{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--navy);}
+.rc-price span{font-size:.65rem;font-weight:400;color:var(--text3);font-family:'Nunito',sans-serif;}
+/* Loading spinner */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-row{text-align:center;padding:32px;color:var(--text3);font-size:.82rem;}
+/* Receipt */
+.receipt-preview{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);box-shadow:var(--shadow);overflow:hidden;}
+.rp-header{background:linear-gradient(135deg,var(--navy),#253050);padding:28px 32px 24px;text-align:center;position:relative;}
+.rp-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:20px;background:var(--white);border-radius:100% 100% 0 0;}
+.rp-hotel{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--gold2);}
+.rp-sub{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:3px;}
+.rp-body{padding:24px 32px;}
+.rp-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.rp-field .lbl{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+.rp-field .val{font-weight:600;color:var(--text);margin-top:1px;font-size:.8rem;}
+.rp-divider{height:1px;background:repeating-linear-gradient(90deg,var(--border) 0,var(--border) 6px,transparent 6px,transparent 12px);margin:16px 0;}
+.rp-line{display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;}
+.rp-line.grand{font-weight:700;font-size:.95rem;color:var(--navy);border-top:2px solid var(--navy);padding-top:9px;margin-top:5px;}
+.rp-footer{padding:20px 32px;background:var(--warm);text-align:center;font-size:.72rem;color:var(--text3);line-height:1.6;}
+.rp-stamp{width:70px;height:70px;border-radius:50%;border:3px solid var(--sage);color:var(--sage);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center;transform:rotate(-15deg);position:absolute;right:32px;top:50%;margin-top:-35px;line-height:1.2;}
+.receipt-list-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:9px;background:var(--white);border:1.5px solid var(--border);margin-bottom:9px;transition:all .2s;cursor:pointer;}
+.receipt-list-item:hover{border-color:var(--gold);box-shadow:var(--shadow2);}
+.rli-left{display:flex;align-items:center;gap:11px;}
+.rli-icon{width:36px;height:36px;border-radius:9px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.rli-ref{font-size:.75rem;font-weight:700;font-family:monospace;}
+.rli-name{font-size:.72rem;color:var(--text3);margin-top:1px;}
+.rli-right{text-align:right;}
+.rli-amt{font-weight:700;color:var(--navy);font-size:.85rem;}
+.rli-date{font-size:.65rem;color:var(--text3);margin-top:1px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-name">🏨 InnKeeper Pro</div>
+    <div class="sb-logo-sub">Hotel Management Suite</div>
+  </div>
+  <div class="sb-hotel">
+    <div class="sb-hotel-name" id="sb-hotel-name">🌴 Sunrise Palms Inn</div>
+    <div class="sb-hotel-loc" id="sb-hotel-loc">12 Marina Road · Lagos</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Front Desk</div>
+    <a class="nav-link active" onclick="nav('dashboard')"><span class="ni">🏠</span>Dashboard</a>
+    <a class="nav-link" onclick="nav('checkin')"><span class="ni">🛎️</span>Check-In / Out<span class="nav-badge" id="badge-checkin">0</span></a>
+    <a class="nav-link" onclick="nav('rooms')"><span class="ni">🚪</span>Room Map</a>
+    <a class="nav-link" onclick="nav('guests')"><span class="ni">👥</span>Guest Registry</a>
+    <div class="sb-section">Reservations</div>
+    <a class="nav-link" onclick="nav('bookings')"><span class="ni">🌐</span>Online Bookings<span class="nav-badge" id="badge-bookings">0</span></a>
+    <div class="sb-section">Guest Services</div>
+    <a class="nav-link" onclick="nav('receipts')"><span class="ni">🧾</span>Receipts</a>
+    <a class="nav-link" onclick="nav('celebrations')"><span class="ni">🎉</span>Celebrations<span class="nav-badge gold" id="badge-celeb">0</span></a>
+    <div class="sb-section">Management</div>
+    <a class="nav-link" onclick="nav('reports')"><span class="ni">📊</span>Reports</a>
+    <a class="nav-link" onclick="nav('settings')"><span class="ni">⚙️</span>Settings</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">MK</div>
+      <div><div class="sb-uname">Mary Karimi</div><div class="sb-urole">Front Desk Manager</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="tb-left">
+      <h1 id="page-title">Dashboard Overview</h1>
+      <p id="page-sub">Loading…</p>
+    </div>
+    <div class="tb-right">
+      <div class="tb-search"><span>🔍</span><input type="text" placeholder="Search guest, room…" id="global-search" oninput="globalSearch(this.value)"></div>
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <button class="btn btn-primary" onclick="openModal('modal-checkin')">＋ New Check-In</button>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="pg-dashboard" class="page active">
+      <div class="g4 mb" id="dash-stats">
+        <div class="stat-card sc-gold"><div class="stat-icon">🏨</div><div class="stat-val" id="ds-occ">—</div><div class="stat-lbl">Occupied Rooms</div></div>
+        <div class="stat-card sc-teal"><div class="stat-icon">👤</div><div class="stat-val" id="ds-guests">—</div><div class="stat-lbl">Guests In-House</div></div>
+        <div class="stat-card sc-rose"><div class="stat-icon">📅</div><div class="stat-val" id="ds-arr">—</div><div class="stat-lbl">Arrivals Today</div></div>
+        <div class="stat-card sc-sage"><div class="stat-icon">💰</div><div class="stat-val" id="ds-rev">—</div><div class="stat-lbl">Revenue Today</div></div>
+      </div>
+      <div class="g-auto mb">
+        <div class="panel">
+          <div class="panel-header">
+            <div><div class="panel-title">Recent Bookings</div><div class="panel-sub" id="ds-occ-sub">Loading…</div></div>
+            <button class="view-all" onclick="nav('bookings')">View all →</button>
+          </div>
+          <div style="padding:0;"><table class="data-table"><thead><tr><th>Guest</th><th>Room</th><th>Check-Out</th><th>Status</th><th></th></tr></thead><tbody id="dash-bookings-body"><tr><td colspan="5" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">Quick Actions</div></div>
+            <div class="panel-body">
+              <div class="qa-grid">
+                <button class="qa-btn" onclick="openModal('modal-checkin')"><span class="qa-icon">🛎️</span><span class="qa-lbl">Check-In Guest</span></button>
+                <button class="qa-btn" onclick="openModal('modal-checkout')"><span class="qa-icon">🚪</span><span class="qa-lbl">Check-Out</span></button>
+                <button class="qa-btn" onclick="nav('bookings')"><span class="qa-icon">📅</span><span class="qa-lbl">New Booking</span></button>
+                <button class="qa-btn" onclick="nav('receipts')"><span class="qa-icon">🧾</span><span class="qa-lbl">Print Receipt</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div><div class="panel-title">Today's Celebrations 🎉</div><div class="panel-sub">Birthdays & anniversaries</div></div></div>
+            <div class="panel-body" id="dash-celebs" style="padding-top:12px;"><div class="loading-row"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="g2 mb">
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">Room Overview</div><div class="panel-sub" id="room-sub">30 rooms total</div></div><button class="view-all" onclick="nav('rooms')">Full Map →</button></div>
+          <div class="panel-body">
+            <div class="room-legend">
+              <div class="rl-item"><div class="rl-dot" style="background:var(--teal2)"></div>Occupied</div>
+              <div class="rl-item"><div class="rl-dot" style="background:#90c890"></div>Vacant</div>
+              <div class="rl-item"><div class="rl-dot" style="background:#b0a0d8"></div>Reserved</div>
+              <div class="rl-item"><div class="rl-dot" style="background:var(--rose)"></div>Maintenance</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;" id="dash-room-grid"><div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div></div>
+            <div class="prog-wrap" style="margin-top:14px;">
+              <div class="prog-labels"><span>Occupancy Rate</span><span style="font-weight:700;color:var(--navy)" id="occ-pct">0%</span></div>
+              <div class="prog-track"><div class="prog-fill" id="occ-bar" style="width:0%;background:linear-gradient(90deg,var(--teal),var(--teal2))"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Live Activity Feed</div></div>
+          <div class="panel-body" id="activity-feed" style="padding-top:6px;"><div class="loading-row"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHECK-IN/OUT ══ -->
+    <div id="pg-checkin" class="page">
+      <div class="g2 mb">
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">🛎️ Pending Arrivals</div><div class="panel-sub" id="arrivals-sub">Loading…</div></div><button class="btn btn-primary btn-sm" onclick="openModal('modal-checkin')">＋ Walk-In</button></div>
+          <div style="padding:0;"><table class="data-table"><thead><tr><th>Guest</th><th>Room</th><th>Ref</th><th>Status</th><th>Action</th></tr></thead><tbody id="arrivals-body"><tr><td colspan="5" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">🚪 Today's Departures</div><div class="panel-sub" id="departures-sub">Loading…</div></div></div>
+          <div style="padding:0;"><table class="data-table"><thead><tr><th>Guest</th><th>Room</th><th>Balance</th><th>Action</th></tr></thead><tbody id="departures-body"><tr><td colspan="4" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ROOM MAP ══ -->
+    <div id="pg-rooms" class="page">
+      <div class="g5 mb" id="room-stats-row">
+        <div class="stat-card sc-teal"><div class="stat-icon">🛏️</div><div class="stat-val" id="rs-occ">—</div><div class="stat-lbl">Occupied</div></div>
+        <div class="stat-card sc-sage"><div class="stat-icon">✅</div><div class="stat-val" id="rs-vac">—</div><div class="stat-lbl">Vacant</div></div>
+        <div class="stat-card sc-lav"><div class="stat-icon">📋</div><div class="stat-val" id="rs-res">—</div><div class="stat-lbl">Reserved</div></div>
+        <div class="stat-card sc-rose"><div class="stat-icon">🔧</div><div class="stat-val" id="rs-maint">—</div><div class="stat-lbl">Maintenance</div></div>
+        <div class="stat-card sc-gold"><div class="stat-icon">📈</div><div class="stat-val" id="rs-rate">—</div><div class="stat-lbl">Occupancy</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div><div class="panel-title">Full Room Map</div><div class="panel-sub">Click any room to view details</div></div>
+          <div class="room-legend">
+            <div class="rl-item"><div class="rl-dot" style="background:var(--teal2)"></div>Occupied</div>
+            <div class="rl-item"><div class="rl-dot" style="background:#90c890"></div>Vacant</div>
+            <div class="rl-item"><div class="rl-dot" style="background:#b0a0d8"></div>Reserved</div>
+            <div class="rl-item"><div class="rl-dot" style="background:var(--rose)"></div>Maintenance</div>
+          </div>
+        </div>
+        <div class="panel-body"><div class="room-map" id="full-room-grid"><div class="loading-row" style="grid-column:1/-1"><div class="spinner"></div></div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ GUESTS ══ -->
+    <div id="pg-guests" class="page">
+      <div class="panel">
+        <div class="panel-header">
+          <div><div class="panel-title">Guest Registry</div><div class="panel-sub">All guests · current & past</div></div>
+          <div style="display:flex;gap:8px;">
+            <input class="finput btn-sm" placeholder="🔍 Search guests…" style="width:200px;" oninput="loadGuests(this.value)">
+            <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-guest')">＋ Add Guest</button>
+          </div>
+        </div>
+        <div style="padding:0;"><table class="data-table"><thead><tr><th>Guest</th><th>Phone</th><th>Email</th><th>Birthday</th><th>Anniversary</th><th>Actions</th></tr></thead><tbody id="guests-body"><tr><td colspan="6" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ BOOKINGS ══ -->
+    <div id="pg-bookings" class="page">
+      <div class="booking-hero">
+        <div class="bh-eyebrow">✦ Reserve Your Room ✦</div>
+        <h1 class="bh-h1">Book Your Stay at<br><em>Sunrise Palms Inn</em></h1>
+        <p class="bh-sub">Comfortable rooms, warm hospitality — search and book instantly.</p>
+        <div class="search-widget">
+          <div class="sw-row">
+            <div><div class="sw-lbl">📅 Check-In</div><input class="sw-in" type="date" id="sw-ci"></div>
+            <div><div class="sw-lbl">📅 Check-Out</div><input class="sw-in" type="date" id="sw-co"></div>
+            <div><div class="sw-lbl">👥 Guests</div><select class="sw-sel"><option>1 Guest</option><option selected>2 Guests</option><option>3 Guests</option><option>4 Guests</option></select></div>
+            <div><div class="sw-lbl">&nbsp;</div><button class="sw-btn" onclick="searchAvailable()">Search →</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="rooms-grid mb" id="available-rooms">
+        <div class="room-card"><div class="rc-img std">🛏️<span class="rc-badge-abs rcb-std">Standard</span></div><div class="rc-body"><div class="rc-name">Comfort Standard</div><div class="rc-desc">Queen bed, en-suite bath, TV, garden view.</div><div class="rc-amenities"><span class="amenity">🛁 Bath</span><span class="amenity">📺 TV</span><span class="amenity">❄️ A/C</span><span class="amenity">☕ Kettle</span></div><div class="rc-foot"><div class="rc-price">₦7,500<span>/night</span></div><button class="btn btn-teal btn-sm" onclick="openBookingModal('Standard',7500)">Book Now</button></div></div></div>
+        <div class="room-card"><div class="rc-img dlx">🌅<span class="rc-badge-abs rcb-dlx">Deluxe</span></div><div class="rc-body"><div class="rc-name">Deluxe King Room</div><div class="rc-desc">King bed, bathtub, balcony city view, complimentary breakfast.</div><div class="rc-amenities"><span class="amenity">🛁 Bathtub</span><span class="amenity">🏙️ View</span><span class="amenity">❄️ A/C</span><span class="amenity">🍳 Breakfast</span></div><div class="rc-foot"><div class="rc-price">₦12,000<span>/night</span></div><button class="btn btn-teal btn-sm" onclick="openBookingModal('Deluxe',12000)">Book Now</button></div></div></div>
+        <div class="room-card"><div class="rc-img ste">👑<span class="rc-badge-abs rcb-ste">Suite</span></div><div class="rc-body"><div class="rc-name">Family Suite</div><div class="rc-desc">King + twin beds, separate lounge, 2 baths, breakfast included.</div><div class="rc-amenities"><span class="amenity">👨‍👩‍👧 Family</span><span class="amenity">🛁 2 Baths</span><span class="amenity">🍳 Breakfast</span><span class="amenity">🧺 Laundry</span></div><div class="rc-foot"><div class="rc-price">₦18,000<span>/night</span></div><button class="btn btn-teal btn-sm" onclick="openBookingModal('Suite',18000)">Book Now</button></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div><div class="panel-title">All Bookings</div><div class="panel-sub" id="bookings-sub">Loading…</div></div>
+          <div style="display:flex;gap:8px;">
+            <select class="finput btn-sm" style="width:150px;" onchange="loadBookings(this.value)">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="checkedin">Checked-In</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn btn-outline btn-sm">📥 Export</button>
+          </div>
+        </div>
+        <div style="padding:0;"><table class="data-table"><thead><tr><th>Guest</th><th>Ref #</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Total</th><th>Pay</th><th>Status</th><th>Actions</th></tr></thead><tbody id="bookings-body"><tr><td colspan="9" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ RECEIPTS ══ -->
+    <div id="pg-receipts" class="page">
+      <div class="g2 mb">
+        <div>
+          <div class="panel-header" style="background:var(--white);border-radius:var(--r) var(--r) 0 0;border:1.5px solid var(--border);border-bottom:none;"><div class="panel-title">Recent Receipts</div><button class="btn btn-primary btn-sm" onclick="openModal('modal-gen-receipt')">＋ Generate Receipt</button></div>
+          <div class="panel" style="border-radius:0 0 var(--r) var(--r);border-top:none;"><div class="panel-body" id="receipt-list"><div class="loading-row"><div class="spinner"></div></div></div></div>
+        </div>
+        <div class="receipt-preview" id="receipt-preview">
+          <div class="rp-header">
+            <div class="rp-hotel" id="rp-hotel-name">🌴 Sunrise Palms Inn</div>
+            <div class="rp-sub" id="rp-hotel-addr">12 Marina Road, Lagos · +234 80 000 0000</div>
+            <div style="height:20px;"></div>
+          </div>
+          <div class="rp-body">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;position:relative;">
+              <div><div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--navy);">OFFICIAL RECEIPT</div><div id="rp-ref" style="font-size:.68rem;color:var(--text3);margin-top:3px;">Select a receipt to preview</div></div>
+              <div class="rp-stamp">PAID<br>IN FULL</div>
+            </div>
+            <div class="rp-info" id="rp-info"></div>
+            <div class="rp-divider"></div>
+            <div id="rp-lines"></div>
+            <div id="rp-total"></div>
+          </div>
+          <div class="rp-footer">Thank you for staying with us! We hope to welcome you again.<br><strong id="rp-footer-name">Sunrise Palms Inn</strong></div>
+          <div style="padding:12px 20px;display:flex;gap:8px;justify-content:center;border-top:1px solid var(--border);">
+            <button class="btn btn-navy btn-sm" onclick="toast('🖨️ Printing receipt…')">🖨️ Print</button>
+            <button class="btn btn-teal btn-sm" onclick="emailReceipt()">📧 Email to Guest</button>
+            <button class="btn btn-outline btn-sm" onclick="toast('📥 PDF downloaded!')">📥 PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CELEBRATIONS ══ -->
+    <div id="pg-celebrations" class="page">
+      <div class="celeb-hero">
+        <div class="ch-title">🎊 Celebrations Centre</div>
+        <div class="ch-sub">Automated birthday & anniversary messages for your guests</div>
+        <div class="ch-stats">
+          <div class="chs-item"><div class="chs-val" id="cs-today">0</div><div class="chs-lbl">Today</div></div>
+          <div class="chs-item"><div class="chs-val" id="cs-month">0</div><div class="chs-lbl">This Month</div></div>
+          <div class="chs-item"><div class="chs-val" id="cs-sent">0</div><div class="chs-lbl">Sent This Year</div></div>
+          <div class="chs-item"><div class="chs-val">96%</div><div class="chs-lbl">Open Rate</div></div>
+        </div>
+      </div>
+      <div class="g2 mb">
+        <div>
+          <div class="panel mb" style="margin-bottom:16px;">
+            <div class="panel-header"><div><div class="panel-title">🎂 Upcoming Birthdays</div><div class="panel-sub">Next 30 days</div></div></div>
+            <div class="panel-body" id="bday-list"><div class="loading-row"><div class="spinner"></div></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div><div class="panel-title">💍 Upcoming Anniversaries</div><div class="panel-sub">Next 30 days</div></div></div>
+            <div class="panel-body" id="anniv-list"><div class="loading-row"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel mb" style="margin-bottom:16px;">
+            <div class="panel-header"><div class="panel-title">📝 Message Templates</div><button class="btn btn-outline btn-sm">＋ New Template</button></div>
+            <div class="panel-body">
+              <div class="msg-template"><div class="mt-header"><span class="mt-title">Warm Birthday Greeting</span><span class="mt-bday">🎂 Birthday</span></div><div style="font-size:.68rem;color:var(--text3);margin-bottom:8px;">via WhatsApp</div><div class="mt-body">"Dear {guest_name}, wishing you a wonderful birthday from all of us at Sunrise Palms Inn! 🌴 May today be filled with joy and beautiful memories."</div><div class="mt-footer"><button class="btn btn-outline btn-xs" onclick="toast('✏️ Editing template…')">Edit</button><button class="btn btn-teal btn-xs" onclick="toast('📤 Test message sent!')">Test Send</button></div></div>
+              <div class="msg-template"><div class="mt-header"><span class="mt-title">Anniversary Celebration</span><span class="mt-anniv">💍 Anniversary</span></div><div style="font-size:.68rem;color:var(--text3);margin-bottom:8px;">via WhatsApp + Email</div><div class="mt-body">"Dear {guest_name}, happy anniversary! 💍 Wishing you both a lifetime of love and happiness. As our cherished guests, you mean so much to us."</div><div class="mt-footer"><button class="btn btn-outline btn-xs" onclick="toast('✏️ Editing template…')">Edit</button><button class="btn btn-teal btn-xs" onclick="toast('📤 Test message sent!')">Test Send</button></div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">⚙️ Auto-Send Settings</div></div>
+            <div class="panel-body">
+              <div class="setting-row"><div><div class="sr-label">Auto Birthday Messages</div><div class="sr-desc">Send at 8:00 AM on guest's birthday</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Anniversary Messages</div><div class="sr-desc">Send the morning of their anniversary</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Send via WhatsApp</div><div class="sr-desc">WhatsApp Business API</div></div><label class="toggle"><input type="checkbox" checked id="set-whatsapp"><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Send via Email</div><div class="sr-desc">Backup email delivery</div></div><label class="toggle"><input type="checkbox" checked id="set-email"><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">SMS Fallback</div><div class="sr-desc">Use SMS if WhatsApp unavailable</div></div><label class="toggle"><input type="checkbox" id="set-sms"><span class="toggle-slider"></span></label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS ══ -->
+    <div id="pg-reports" class="page">
+      <div class="g4 mb" id="report-kpis">
+        <div class="report-kpi"><div class="rk-lbl">Total Revenue (Month)</div><div class="rk-val" id="rk-rev">—</div><div class="rk-chg chg-up">Live from DB</div></div>
+        <div class="report-kpi"><div class="rk-lbl">Avg Occupancy Rate</div><div class="rk-val" id="rk-occ">—</div><div class="rk-chg chg-up">Last 30 days</div></div>
+        <div class="report-kpi"><div class="rk-lbl">Total Bookings</div><div class="rk-val" id="rk-bks">—</div><div class="rk-chg chg-up">All time</div></div>
+        <div class="report-kpi"><div class="rk-lbl">Avg Revenue/Room</div><div class="rk-val" id="rk-arr">—</div><div class="rk-chg chg-up">This month</div></div>
+      </div>
+      <div class="g2 mb">
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">Monthly Revenue (₦k)</div><div class="panel-sub">Last 6 months</div></div><button class="btn btn-outline btn-sm">📥 Export</button></div>
+          <div class="panel-body">
+            <div class="mini-chart" id="revenue-chart"></div>
+            <div style="display:flex;justify-content:space-around;margin-top:6px;" id="revenue-labels"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">Occupancy by Day (30d)</div><div class="panel-sub">Room utilisation rate</div></div></div>
+          <div class="panel-body">
+            <div class="mini-chart" id="occ-chart"></div>
+          </div>
+        </div>
+      </div>
+      <div class="g2 mb">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Revenue by Room Type</div></div>
+          <div class="panel-body" id="rev-by-type"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Bookings by Channel</div></div>
+          <div class="panel-body" id="rev-by-channel"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Top Guests by Revenue (2026)</div><button class="btn btn-outline btn-sm">Full Report</button></div>
+        <div style="padding:0;"><table class="data-table"><thead><tr><th>#</th><th>Guest</th><th>Stays</th><th>Nights</th><th>Revenue</th><th>Last Visit</th></tr></thead><tbody id="top-guests-body"><tr><td colspan="6" class="loading-row"><div class="spinner"></div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div id="pg-settings" class="page">
+      <div class="g2">
+        <div class="panel" style="height:fit-content;">
+          <div class="panel-header"><div class="panel-title">Settings</div></div>
+          <div class="panel-body">
+            <div class="settings-nav">
+              <button class="sn-item active" onclick="settingsTab(this,'st-hotel')"><span>🏨</span>Hotel Profile</button>
+              <button class="sn-item" onclick="settingsTab(this,'st-rooms')"><span>🚪</span>Room Types & Pricing</button>
+              <button class="sn-item" onclick="settingsTab(this,'st-notify')"><span>🔔</span>Notifications</button>
+              <button class="sn-item" onclick="settingsTab(this,'st-staff')"><span>👤</span>Staff Accounts</button>
+              <button class="sn-item" onclick="settingsTab(this,'st-pay')"><span>💳</span>Payment Config</button>
+              <button class="sn-item" onclick="settingsTab(this,'st-appear')"><span>🎨</span>Appearance</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div id="st-hotel" class="settings-section active panel">
+            <div class="panel-header"><div class="panel-title">🏨 Hotel Profile</div><button class="btn btn-primary btn-sm" onclick="saveSettings()">Save Changes</button></div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="form-group full"><label class="flbl">Hotel Name</label><input class="finput" id="set-hotel-name" value="Sunrise Palms Inn"></div>
+                <div class="form-group full"><label class="flbl">Address</label><input class="finput" id="set-hotel-addr" value="12 Marina Road, Lagos, Nigeria"></div>
+                <div class="form-group"><label class="flbl">Phone</label><input class="finput" id="set-hotel-phone" value="+234 80 000 0000"></div>
+                <div class="form-group"><label class="flbl">Email</label><input class="finput" id="set-hotel-email" value="info@sunrisepalms.com"></div>
+                <div class="form-group"><label class="flbl">Check-In Time</label><input class="finput" type="time" id="set-ci-time" value="14:00"></div>
+                <div class="form-group"><label class="flbl">Check-Out Time</label><input class="finput" type="time" id="set-co-time" value="12:00"></div>
+              </div>
+            </div>
+          </div>
+          <div id="st-rooms" class="settings-section panel">
+            <div class="panel-header"><div class="panel-title">🚪 Room Types & Pricing</div><button class="btn btn-primary btn-sm" onclick="toast('✅ Pricing saved!')">Save</button></div>
+            <div class="panel-body">
+              <table class="data-table"><thead><tr><th>Room Type</th><th>Count</th><th>Rate/Night</th><th>Breakfast</th><th>Max Guests</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Standard</strong></td><td><input class="finput" value="20" style="width:60px;padding:5px 8px;font-size:.78rem;"></td><td><input class="finput" id="rate-std" value="₦7,500" style="width:90px;padding:5px 8px;font-size:.78rem;"></td><td><label class="toggle" style="margin:0 auto;display:block;"><input type="checkbox"><span class="toggle-slider"></span></label></td><td><input class="finput" value="2" style="width:50px;padding:5px 8px;font-size:.78rem;"></td></tr>
+                <tr><td><strong>Deluxe</strong></td><td><input class="finput" value="8" style="width:60px;padding:5px 8px;font-size:.78rem;"></td><td><input class="finput" id="rate-dlx" value="₦12,000" style="width:90px;padding:5px 8px;font-size:.78rem;"></td><td><label class="toggle" style="margin:0 auto;display:block;"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><input class="finput" value="2" style="width:50px;padding:5px 8px;font-size:.78rem;"></td></tr>
+                <tr><td><strong>Family Suite</strong></td><td><input class="finput" value="2" style="width:60px;padding:5px 8px;font-size:.78rem;"></td><td><input class="finput" id="rate-ste" value="₦18,000" style="width:90px;padding:5px 8px;font-size:.78rem;"></td><td><label class="toggle" style="margin:0 auto;display:block;"><input type="checkbox" checked><span class="toggle-slider"></span></label></td><td><input class="finput" value="4" style="width:50px;padding:5px 8px;font-size:.78rem;"></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div id="st-notify" class="settings-section panel">
+            <div class="panel-header"><div class="panel-title">🔔 Notifications</div></div>
+            <div class="panel-body">
+              <div class="setting-row"><div><div class="sr-label">New Booking Alerts</div><div class="sr-desc">Notify staff when a new booking arrives</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Check-In Reminders</div><div class="sr-desc">Alert 2 hrs before guest arrival</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Check-Out Reminders</div><div class="sr-desc">Morning alert on departure day</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">Payment Confirmations</div><div class="sr-desc">SMS + email on every payment</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            </div>
+          </div>
+          <div id="st-staff" class="settings-section panel">
+            <div class="panel-header"><div class="panel-title">👤 Staff Accounts</div><button class="btn btn-primary btn-sm" onclick="toast('➕ Staff account created!')">Add Staff</button></div>
+            <div style="padding:0;"><table class="data-table"><thead><tr><th>Staff Member</th><th>Role</th><th>Access</th><th>Last Login</th><th>Status</th></tr></thead><tbody>
+              <tr><td><div class="name-cell"><div class="avatar" style="background:var(--teal)">MK</div><div><div class="nc-main">Mary Karimi</div><div class="nc-sub">mary@sunrisepalms.com</div></div></div></td><td>Front Desk Mgr</td><td><span class="badge b-navy">Admin</span></td><td>Today, 8:02 AM</td><td><span class="badge b-green">Active</span></td></tr>
+              <tr><td><div class="name-cell"><div class="avatar" style="background:var(--rose)">JO</div><div><div class="nc-main">James Okafor</div><div class="nc-sub">james@sunrisepalms.com</div></div></div></td><td>Receptionist</td><td><span class="badge b-teal">Staff</span></td><td>Today, 7:45 AM</td><td><span class="badge b-green">Active</span></td></tr>
+            </tbody></table></div>
+          </div>
+          <div id="st-pay" class="settings-section panel">
+            <div class="panel-header"><div class="panel-title">💳 Payment Configuration</div><button class="btn btn-primary btn-sm" onclick="saveSettings()">Save</button></div>
+            <div class="panel-body">
+              <div class="fdivider">Payment Gateways</div>
+              <div class="setting-row"><div><div class="sr-label">Paystack</div><div class="sr-desc">Card, bank transfer, USSD</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="setting-row"><div><div class="sr-label">MTN Mobile Money</div><div class="sr-desc">West Africa mobile payments</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+              <div class="fdivider">Currency & Tax</div>
+              <div class="form-grid">
+                <div class="form-group"><label class="flbl">Service Charge (%)</label><input class="finput" id="set-svc-charge" value="5"></div>
+                <div class="form-group"><label class="flbl">VAT (%)</label><input class="finput" id="set-vat" value="7.5"></div>
+                <div class="form-group"><label class="flbl">Deposit Required (%)</label><input class="finput" id="set-deposit-pct" value="30"></div>
+              </div>
+            </div>
+          </div>
+          <div id="st-appear" class="settings-section panel">
+            <div class="panel-header"><div class="panel-title">🎨 Appearance</div></div>
+            <div class="panel-body">
+              <div class="setting-row"><div><div class="sr-label">Primary Accent Color</div></div><div class="color-row"><div class="color-swatch selected" style="background:#c9a84c" onclick="selectSwatch(this)"></div><div class="color-swatch" style="background:#2d7a7a" onclick="selectSwatch(this)"></div><div class="color-swatch" style="background:#d4726a" onclick="selectSwatch(this)"></div><div class="color-swatch" style="background:#4a8a5a" onclick="selectSwatch(this)"></div><div class="color-swatch" style="background:#7c6bb5" onclick="selectSwatch(this)"></div></div></div>
+              <div class="setting-row"><div><div class="sr-label">Show Animations</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="overlay" id="modal-checkin">
+  <div class="modal">
+    <div class="mhd"><h3>🛎️ New Guest Check-In</h3><button class="mclose" onclick="closeModal('modal-checkin')">✕</button></div>
+    <div class="mbody">
+      <div class="fdivider">Guest Information</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">First Name *</label><input class="finput" id="ci-fn" placeholder="e.g. Kwame"></div>
+        <div class="form-group"><label class="flbl">Last Name *</label><input class="finput" id="ci-ln" placeholder="e.g. Asante"></div>
+        <div class="form-group"><label class="flbl">Phone *</label><input class="finput" id="ci-ph" placeholder="+234 80 123 4567"></div>
+        <div class="form-group"><label class="flbl">Email</label><input class="finput" type="email" id="ci-em" placeholder="guest@email.com"></div>
+        <div class="form-group"><label class="flbl">Date of Birth</label><input class="finput" type="date" id="ci-dob"></div>
+        <div class="form-group"><label class="flbl">Wedding Anniversary</label><input class="finput" type="date" id="ci-anniv"></div>
+        <div class="form-group full"><label class="flbl">ID / Passport Number</label><input class="finput" id="ci-id" placeholder="National ID, Passport, Drivers License"></div>
+      </div>
+      <div class="fdivider">Room Assignment</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">Room Type *</label><select class="fsel" id="ci-room-type" onchange="updateRateFromType()"><option value="">— Select Type —</option><option value="Standard">Standard (₦7,500/night)</option><option value="Deluxe">Deluxe (₦12,000/night)</option><option value="Suite">Family Suite (₦18,000/night)</option></select></div>
+        <div class="form-group"><label class="flbl">Number of Guests</label><select class="fsel" id="ci-guests"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        <div class="form-group"><label class="flbl">Check-In Date *</label><input class="finput" type="date" id="ci-in" onchange="calcCheckinTotal()"></div>
+        <div class="form-group"><label class="flbl">Check-Out Date *</label><input class="finput" type="date" id="ci-out" onchange="calcCheckinTotal()"></div>
+        <div class="form-group full"><label class="flbl">Special Requests</label><input class="finput" id="ci-notes" placeholder="Extra pillows, ground floor, anniversary setup…"></div>
+      </div>
+      <div id="ci-cost-preview" style="display:none;background:var(--teal-pale);border-radius:var(--rs);padding:12px 16px;margin-top:8px;font-size:.82rem;">
+        <strong id="ci-cost-label">—</strong>
+      </div>
+      <div class="fdivider">Payment</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">Payment Method</label><select class="fsel" id="ci-pay"><option>Cash on Arrival</option><option>Card (POS)</option><option>Bank Transfer</option><option>Mobile Money</option></select></div>
+        <div class="form-group"><label class="flbl">Deposit Paid (₦)</label><input class="finput" id="ci-deposit" placeholder="0.00"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-checkin')">Cancel</button><button class="btn btn-teal" onclick="doCheckin()">✔ Confirm Check-In</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-checkout">
+  <div class="modal modal-sm">
+    <div class="mhd"><h3>🚪 Guest Check-Out</h3><button class="mclose" onclick="closeModal('modal-checkout')">✕</button></div>
+    <div class="mbody">
+      <div class="form-group" style="margin-bottom:14px;"><label class="flbl">Select Booking / Room</label>
+        <select class="fsel" id="co-booking" onchange="loadCheckoutSummary()"><option value="">— Select —</option></select>
+      </div>
+      <div id="co-summary" style="background:var(--teal-pale);border-radius:var(--rs);padding:13px 16px;margin-bottom:14px;display:none;">
+        <div style="font-size:.7rem;color:var(--text3);margin-bottom:7px;font-weight:700;">BILL SUMMARY</div>
+        <div id="co-lines"></div>
+        <div style="display:flex;justify-content:space-between;font-size:.88rem;font-weight:700;border-top:1px solid var(--border);padding-top:8px;margin-top:8px;"><span>Balance Due</span><span id="co-balance" style="color:var(--navy)">₦0</span></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">Payment Amount (₦)</label><input class="finput" id="co-pay-amt" placeholder="0.00"></div>
+        <div class="form-group"><label class="flbl">Payment Method</label><select class="fsel" id="co-pay-method"><option>Cash</option><option>Card (POS)</option><option>Bank Transfer</option></select></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-checkout')">Cancel</button><button class="btn btn-primary" onclick="doCheckout()">Generate Receipt & Check Out</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-add-guest">
+  <div class="modal modal-sm">
+    <div class="mhd"><h3>👤 Add New Guest</h3><button class="mclose" onclick="closeModal('modal-add-guest')">✕</button></div>
+    <div class="mbody">
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">First Name *</label><input class="finput" id="ag-fn" placeholder="First name"></div>
+        <div class="form-group"><label class="flbl">Last Name *</label><input class="finput" id="ag-ln" placeholder="Last name"></div>
+        <div class="form-group"><label class="flbl">Phone</label><input class="finput" id="ag-ph" placeholder="+234…"></div>
+        <div class="form-group"><label class="flbl">Email</label><input class="finput" type="email" id="ag-em" placeholder="email@…"></div>
+        <div class="form-group"><label class="flbl">Date of Birth</label><input class="finput" type="date" id="ag-dob"></div>
+        <div class="form-group"><label class="flbl">Wedding Anniversary</label><input class="finput" type="date" id="ag-anniv"></div>
+        <div class="form-group full"><label class="flbl">ID Number</label><input class="finput" id="ag-id" placeholder="National ID / Passport"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-add-guest')">Cancel</button><button class="btn btn-teal" onclick="addGuest()">Save Guest</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-gen-receipt">
+  <div class="modal modal-sm">
+    <div class="mhd"><h3>🧾 Generate Receipt</h3><button class="mclose" onclick="closeModal('modal-gen-receipt')">✕</button></div>
+    <div class="mbody">
+      <div class="form-group" style="margin-bottom:12px;"><label class="flbl">Select Booking</label>
+        <select class="fsel" id="gr-booking"><option value="">— Select booking —</option></select>
+      </div>
+      <div class="form-group"><label class="flbl">Receipt Type</label><select class="fsel" id="gr-type"><option>Full Receipt</option><option>Deposit Receipt</option><option>Partial Payment</option></select></div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-gen-receipt')">Cancel</button><button class="btn btn-primary" onclick="genReceipt()">Generate Receipt</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-new-booking">
+  <div class="modal">
+    <div class="mhd"><h3>📅 New Booking</h3><button class="mclose" onclick="closeModal('modal-new-booking')">✕</button></div>
+    <div class="mbody">
+      <div style="background:var(--teal-pale);border-radius:var(--rs);padding:10px 14px;margin-bottom:16px;font-size:.82rem;">
+        <strong id="nb-room-info">Room: —</strong>
+      </div>
+      <div class="fdivider">Guest Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">First Name *</label><input class="finput" id="nb-fn" placeholder="First name"></div>
+        <div class="form-group"><label class="flbl">Last Name *</label><input class="finput" id="nb-ln" placeholder="Last name"></div>
+        <div class="form-group"><label class="flbl">Email *</label><input class="finput" type="email" id="nb-em" placeholder="email@…"></div>
+        <div class="form-group"><label class="flbl">Phone *</label><input class="finput" id="nb-ph" placeholder="+234…"></div>
+        <div class="form-group"><label class="flbl">Date of Birth</label><input class="finput" type="date" id="nb-dob"></div>
+        <div class="form-group"><label class="flbl">Anniversary</label><input class="finput" type="date" id="nb-anniv"></div>
+      </div>
+      <div class="fdivider">Stay Dates</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="flbl">Check-In *</label><input class="finput" type="date" id="nb-ci" onchange="calcBookingTotal()"></div>
+        <div class="form-group"><label class="flbl">Check-Out *</label><input class="finput" type="date" id="nb-co" onchange="calcBookingTotal()"></div>
+        <div class="form-group"><label class="flbl">Guests</label><select class="fsel" id="nb-guests"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+        <div class="form-group"><label class="flbl">Payment Method</label><select class="fsel" id="nb-pay"><option>Cash</option><option>Bank Transfer</option><option>Mobile Money</option><option>Online</option></select></div>
+      </div>
+      <div id="nb-total-preview" style="background:var(--gold-pale);border-radius:var(--rs);padding:12px 16px;margin-top:10px;font-size:.82rem;display:none;">
+        <div id="nb-total-lines"></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal('modal-new-booking')">Cancel</button><button class="btn btn-primary" onclick="submitBooking()">Confirm Booking →</button></div>
+  </div>
+</div>
+
+<div id="toast"><span id="toast-icon">✅</span><span id="toast-msg">Done!</span></div>
+
+<script>
+/* ════════════════════════════════════════
+   API HELPERS
+════════════════════════════════════════ */
+const API = '';  // same origin
+
+async function api(path, opts = {}) {
+  try {
+    const r = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opts
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'API error');
+    return j.data !== undefined ? j.data : j;
+  } catch (e) {
+    toast('❌ ' + e.message, '❌');
+    throw e;
+  }
+}
+
+const get  = path        => api(path);
+const post = (path, d)   => api(path, { method:'POST',   body: JSON.stringify(d) });
+const patch= (path, d)   => api(path, { method:'PATCH',  body: JSON.stringify(d) });
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+const pageTitles = {
+  dashboard:'Dashboard Overview', checkin:'Check-In / Check-Out', rooms:'Room Management',
+  guests:'Guest Registry', bookings:'Online Bookings', receipts:'Receipt Generator',
+  celebrations:'Celebrations Centre', reports:'Reports & Analytics', settings:'Settings'
+};
+
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('pg-' + id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.getAttribute('onclick') === `nav('${id}')`);
+  });
+  document.getElementById('page-title').textContent = pageTitles[id] || id;
+  // Load page data
+  ({
+    dashboard:    loadDashboard,
+    checkin:      loadCheckinPage,
+    rooms:        loadRooms,
+    guests:       loadGuests,
+    bookings:     loadBookings,
+    receipts:     loadReceipts,
+    celebrations: loadCelebrations,
+    reports:      loadReports,
+    settings:     loadSettings,
+  }[id] || (() => {}))();
+}
+
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+const fmt  = n => '₦' + Number(n || 0).toLocaleString();
+const today = () => new Date().toISOString().split('T')[0];
+const tomorrow = () => { const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; };
+
+const COLORS = ['var(--teal)','var(--rose)','var(--gold)','var(--lavender)','var(--sage)','var(--navy2)'];
+const initials = name => name.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+const avatar = (name, i) => `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${initials(name)}</div>`;
+
+const stC = {confirmed:'b-teal',checkedin:'b-green',pending:'b-gold',completed:'b-lav',cancelled:'b-rose'};
+const stL = {confirmed:'Confirmed',checkedin:'Checked-In',pending:'Pending',completed:'Completed',cancelled:'Cancelled'};
+const pyC = {paid:'b-green',partial:'b-gold',unpaid:'b-rose'};
+const pyL = {paid:'Paid ✓',partial:'Partial',unpaid:'Unpaid'};
+const badge = (s,lm,cm) => `<span class="badge ${cm[s]||'b-navy'}">${lm[s]||s}</span>`;
+
+/* ════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════ */
+async function loadDashboard() {
+  const d = await get('/api/dashboard');
+  if (!d) return;
+
+  const s = d.stats;
+  document.getElementById('ds-occ').textContent     = s.occupied_rooms;
+  document.getElementById('ds-guests').textContent  = s.guests_inhouse;
+  document.getElementById('ds-arr').textContent     = s.arrivals_today;
+  document.getElementById('ds-rev').textContent     = fmt(s.revenue_today);
+  document.getElementById('ds-occ-sub').textContent = `${s.occupied_rooms} of ${s.total_rooms} rooms occupied`;
+  document.getElementById('occ-pct').textContent    = s.occupancy_rate + '%';
+  document.getElementById('occ-bar').style.width    = s.occupancy_rate + '%';
+  document.getElementById('page-sub').textContent   = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) + ' · Sunrise Palms Inn';
+
+  // Badges
+  document.getElementById('badge-checkin').textContent  = s.arrivals_today;
+  document.getElementById('badge-bookings').textContent = s.pending_bookings;
+  document.getElementById('badge-celeb').textContent    = d.today_birthdays.length + d.today_anniversaries.length;
+
+  // Recent bookings table
+  document.getElementById('dash-bookings-body').innerHTML = d.recent_bookings.slice(0,6).map((b,i) => `
+    <tr>
+      <td><div class="name-cell">${avatar(b.guest_name,i)}<div class="nc-main">${b.guest_name}</div></div></td>
+      <td>${b.room_number} <span style="font-size:.68rem;color:var(--text3)">${b.room_type}</span></td>
+      <td style="font-size:.76rem;color:var(--text2)">${b.checkout}</td>
+      <td>${badge(b.status,stL,stC)}</td>
+      <td><button class="btn btn-outline btn-xs" onclick="toast('Opening booking…')">View</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">No active bookings</td></tr>';
+
+  // Celebrations
+  const celebHTML = [...d.today_birthdays.map(g => `
+    <div class="celeb-card cc-bday">
+      <span class="cc-icon">🎂</span>
+      <div><div class="cc-name">${g.name}</div><div class="cc-info">Birthday · Room ${g.room_number||'—'}</div></div>
+      <button class="cc-btn" onclick="sendCeleb('${g.id}','birthday')">Send Wish</button>
+    </div>`),
+    ...d.today_anniversaries.map(g => `
+    <div class="celeb-card cc-anniv">
+      <span class="cc-icon">💍</span>
+      <div><div class="cc-name">${g.name}</div><div class="cc-info">Anniversary · Room ${g.room_number||'—'}</div></div>
+      <button class="cc-btn" onclick="sendCeleb('${g.id}','anniversary')">Send Wish</button>
+    </div>`)
+  ].join('') || '<div style="text-align:center;padding:14px;color:var(--text3);font-size:.8rem;">🎊 No celebrations today</div>';
+  document.getElementById('dash-celebs').innerHTML = celebHTML;
+
+  // Activity feed
+  document.getElementById('activity-feed').innerHTML = d.recent_bookings.slice(0,6).map(b => {
+    const colors = {'checkedin':'var(--teal)','completed':'var(--sage)','cancelled':'var(--rose)','pending':'var(--gold)','confirmed':'var(--lavender)'};
+    return `<div class="act-item">
+      <div class="act-dot" style="background:${colors[b.status]||'var(--text3)'}"></div>
+      <div>
+        <div class="act-text"><strong>${b.guest_name}</strong> — ${stL[b.status]||b.status}, Room ${b.room_number}</div>
+        <div class="act-time">${b.checkin} → ${b.checkout}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Rooms mini grid
+  loadRoomsMini();
+}
+
+async function loadRoomsMini() {
+  const rooms = await get('/api/rooms');
+  if (!rooms) return;
+  renderRoomGrid('dash-room-grid', rooms);
+}
+
+/* ════════════════════════════════════════
+   ROOMS
+════════════════════════════════════════ */
+function renderRoomGrid(containerId, rooms) {
+  const g = document.getElementById(containerId);
+  if (!g) return;
+  const counts = {occupied:0,vacant:0,reserved:0,maintenance:0};
+  rooms.forEach(r => counts[r.status]=(counts[r.status]||0)+1);
+
+  // Update room stats if on rooms page
+  if (document.getElementById('rs-occ')) {
+    document.getElementById('rs-occ').textContent   = counts.occupied   || 0;
+    document.getElementById('rs-vac').textContent   = counts.vacant     || 0;
+    document.getElementById('rs-res').textContent   = counts.reserved   || 0;
+    document.getElementById('rs-maint').textContent = counts.maintenance|| 0;
+    const rate = Math.round((counts.occupied||0)/rooms.length*100);
+    document.getElementById('rs-rate').textContent  = rate+'%';
+  }
+
+  g.innerHTML = rooms.map(r => `
+    <div class="rm-cell rmc-${r.status}" onclick="clickRoom(${r.id},'${r.number}','${r.status}')">
+      <div class="rm-num">${r.number}</div>
+      <div class="rm-type">${r.type.slice(0,3)}</div>
+      <div class="rm-guest">${r.status==='occupied'?'Occupied':r.status==='vacant'?'Free':r.status==='reserved'?'Reserved':'Maint.'}</div>
+    </div>`).join('');
+}
+
+async function loadRooms() {
+  const rooms = await get('/api/rooms');
+  if (rooms) renderRoomGrid('full-room-grid', rooms);
+}
+
+function clickRoom(id, num, status) {
+  const msgs = {occupied:`Room ${num} — Currently occupied`, vacant:`Room ${num} — Vacant & ready`, reserved:`Room ${num} — Reserved for upcoming guest`, maintenance:`Room ${num} — Under maintenance`};
+  toast(msgs[status] || `Room ${num}`);
+}
+
+/* ════════════════════════════════════════
+   CHECK-IN PAGE
+════════════════════════════════════════ */
+async function loadCheckinPage() {
+  const today_str = today();
+  const [arrivals, departures] = await Promise.all([
+    get('/api/bookings?status=pending'),
+    get('/api/bookings?status=checkedin')
+  ]);
+  if (!arrivals || !departures) return;
+
+  // Filter departures by today
+  const todayDeps = departures.filter(b => b.checkout === today_str);
+
+  document.getElementById('arrivals-sub').textContent  = `${arrivals.length} guests expected`;
+  document.getElementById('departures-sub').textContent= `${todayDeps.length} guests checking out today`;
+
+  document.getElementById('arrivals-body').innerHTML = arrivals.map((b,i) => `
+    <tr>
+      <td><div class="name-cell">${avatar(b.guest_name,i)}<div><div class="nc-main">${b.guest_name}</div><div class="nc-sub">${b.email}</div></div></div></td>
+      <td><strong>${b.room_number}</strong> · ${b.room_type}</td>
+      <td style="font-size:.72rem;font-family:monospace;color:var(--text3)">${b.id}</td>
+      <td>${badge(b.status,stL,stC)}</td>
+      <td><button class="btn btn-teal btn-xs" onclick="quickCheckin('${b.id}','${b.guest_name}')">Check In</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">No pending arrivals</td></tr>';
+
+  document.getElementById('departures-body').innerHTML = todayDeps.map((b,i) => `
+    <tr>
+      <td><div class="name-cell">${avatar(b.guest_name,i)}<div><div class="nc-main">${b.guest_name}</div><div class="nc-sub">Room ${b.room_number}</div></div></div></td>
+      <td><strong>${b.room_number}</strong></td>
+      <td style="font-weight:700;color:${b.balance>0?'var(--rose)':'var(--sage)'}">${b.balance>0?fmt(b.balance):'Paid ✓'}</td>
+      <td><button class="btn btn-primary btn-xs" onclick="openCheckoutFor('${b.id}','${b.guest_name}',${b.balance})">Check Out</button></td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">No departures today</td></tr>';
+}
+
+async function quickCheckin(bid, name) {
+  await post(`/api/bookings/${bid}/checkin`);
+  toast(`✅ ${name} checked in!`);
+  loadCheckinPage();
+  loadDashboard();
+}
+
+/* ════════════════════════════════════════
+   GUESTS
+════════════════════════════════════════ */
+async function loadGuests(q = '') {
+  const guests = await get('/api/guests' + (q ? `?q=${encodeURIComponent(q)}` : ''));
+  if (!guests) return;
+  document.getElementById('guests-body').innerHTML = guests.map((g,i) => `
+    <tr>
+      <td><div class="name-cell">${avatar(g.first_name+' '+g.last_name,i)}<div><div class="nc-main">${g.first_name} ${g.last_name}</div></div></div></td>
+      <td style="font-size:.78rem;color:var(--text2)">${g.phone||'—'}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${g.email||'—'}</td>
+      <td style="font-size:.75rem">${g.dob?'🎂 '+g.dob:'—'}</td>
+      <td style="font-size:.75rem">${g.anniversary?'💍 '+g.anniversary:'—'}</td>
+      <td><div style="display:flex;gap:4px;">
+        <button class="btn btn-outline btn-xs" onclick="toast('Opening ${g.first_name}\'s profile…')">View</button>
+        <button class="btn btn-teal btn-xs" onclick="sendCeleb('${g.id}','birthday')">🎂 Wish</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">No guests found</td></tr>';
+}
+
+function globalSearch(q) {
+  if (q.length > 2) loadGuests(q);
+}
+
+async function addGuest() {
+  const fn = document.getElementById('ag-fn').value.trim();
+  const ln = document.getElementById('ag-ln').value.trim();
+  if (!fn || !ln) { toast('⚠️ Name required', '⚠️'); return; }
+  await post('/api/guests', {
+    first_name: fn, last_name: ln,
+    phone: document.getElementById('ag-ph').value,
+    email: document.getElementById('ag-em').value,
+    dob:   document.getElementById('ag-dob').value,
+    anniversary: document.getElementById('ag-anniv').value,
+    id_number: document.getElementById('ag-id').value
+  });
+  closeModal('modal-add-guest');
+  toast('✅ Guest added!');
+  loadGuests();
+}
+
+/* ════════════════════════════════════════
+   BOOKINGS
+════════════════════════════════════════ */
+async function loadBookings(status = '') {
+  const bks = await get('/api/bookings' + (status ? `?status=${status}` : ''));
+  if (!bks) return;
+  document.getElementById('bookings-sub').textContent = `${bks.length} bookings`;
+  document.getElementById('bookings-body').innerHTML = bks.map((b,i) => `
+    <tr>
+      <td><div class="name-cell">${avatar(b.guest_name,i)}<div><div class="nc-main">${b.guest_name}</div><div class="nc-sub">${b.email||''}</div></div></div></td>
+      <td style="font-size:.7rem;font-family:monospace;color:var(--text3)">${b.id}</td>
+      <td><strong>${b.room_number}</strong> <span style="font-size:.68rem;color:var(--text3)">${b.room_type}</span></td>
+      <td style="font-size:.78rem">${b.checkin}</td>
+      <td style="font-size:.78rem">${b.checkout}</td>
+      <td style="font-weight:700">${fmt(b.total)}</td>
+      <td>${badge(b.pay_status,pyL,pyC)}</td>
+      <td>${badge(b.status,stL,stC)}</td>
+      <td><div style="display:flex;gap:5px;">
+        <button class="btn btn-outline btn-xs" onclick="toast('Opening booking ${b.id}…')">View</button>
+        ${b.status==='pending'?`<button class="btn btn-teal btn-xs" onclick="confirmBooking('${b.id}')">Confirm</button>`:''}
+        ${b.status==='checkedin'?`<button class="btn btn-rose btn-xs" onclick="openCheckoutFor('${b.id}','${b.guest_name}',${b.balance})">Checkout</button>`:''}
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No bookings found</td></tr>';
+}
+
+async function confirmBooking(bid) {
+  await patch(`/api/bookings/${bid}`, {status:'confirmed'});
+  toast('✅ Booking confirmed!');
+  loadBookings();
+}
+
+let currentBookingType = {type:'Standard', rate:7500};
+
+function openBookingModal(type, rate) {
+  currentBookingType = {type, rate};
+  document.getElementById('nb-room-info').textContent = `${type} Room · ${fmt(rate)}/night`;
+  const d = today(), t = tomorrow();
+  document.getElementById('nb-ci').value = d;
+  document.getElementById('nb-co').value = t;
+  calcBookingTotal();
+  openModal('modal-new-booking');
+}
+
+function calcBookingTotal() {
+  const ci = document.getElementById('nb-ci')?.value;
+  const co = document.getElementById('nb-co')?.value;
+  if (!ci || !co) return;
+  const nights = Math.round((new Date(co)-new Date(ci))/86400000);
+  if (nights <= 0) return;
+  const base = currentBookingType.rate * nights;
+  const svc  = Math.round(base * 0.05);
+  const total= base + svc;
+  document.getElementById('nb-total-preview').style.display = '';
+  document.getElementById('nb-total-lines').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">${fmt(currentBookingType.rate)} × ${nights} night${nights>1?'s':''}<strong>${fmt(base)}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">Service charge (5%)<strong>${fmt(svc)}</strong></div>
+    <div style="display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">Total<strong style="color:var(--teal)">${fmt(total)}</strong></div>`;
+}
+
+async function submitBooking() {
+  const fn = document.getElementById('nb-fn').value.trim();
+  const ln = document.getElementById('nb-ln').value.trim();
+  const em = document.getElementById('nb-em').value.trim();
+  const ci = document.getElementById('nb-ci').value;
+  const co = document.getElementById('nb-co').value;
+  if (!fn||!ln||!em||!ci||!co) { toast('⚠️ Please fill all required fields','⚠️'); return; }
+
+  // Create guest first
+  const g = await post('/api/guests', {
+    first_name: fn, last_name: ln,
+    phone: document.getElementById('nb-ph').value,
+    email: em,
+    dob:   document.getElementById('nb-dob').value,
+    anniversary: document.getElementById('nb-anniv').value
+  });
+
+  // Find an available room of this type
+  const rooms = await get(`/api/rooms?type=${currentBookingType.type}&checkin=${ci}&checkout=${co}`);
+  if (!rooms || rooms.length === 0) { toast('⚠️ No rooms available for those dates','⚠️'); return; }
+
+  const bk = await post('/api/bookings', {
+    guest_id: g.id, room_id: rooms[0].id,
+    checkin: ci, checkout: co,
+    guests_count: parseInt(document.getElementById('nb-guests').value)||1,
+    pay_method: document.getElementById('nb-pay').value,
+    source: 'online', status: 'confirmed'
+  });
+
+  closeModal('modal-new-booking');
+  toast('🎉 Booking confirmed! Ref: ' + bk.id);
+  loadBookings();
+  loadDashboard();
+}
+
+function searchAvailable() {
+  const ci = document.getElementById('sw-ci').value;
+  const co = document.getElementById('sw-co').value;
+  if (ci && co) {
+    document.getElementById('nb-ci') && (document.getElementById('nb-ci').value = ci);
+    document.getElementById('nb-co') && (document.getElementById('nb-co').value = co);
+    toast('🔍 Rooms shown above are available for your dates!');
+  } else {
+    toast('⚠️ Please select check-in and check-out dates', '⚠️');
+  }
+}
+
+/* ════════════════════════════════════════
+   CHECK-IN / CHECK-OUT MODALS
+════════════════════════════════════════ */
+const roomRates = {Standard:7500, Deluxe:12000, Suite:18000};
+
+function updateRateFromType() {
+  calcCheckinTotal();
+}
+
+function calcCheckinTotal() {
+  const type  = document.getElementById('ci-room-type').value;
+  const ci    = document.getElementById('ci-in').value;
+  const co    = document.getElementById('ci-out').value;
+  if (!type || !ci || !co) return;
+  const nights = Math.round((new Date(co)-new Date(ci))/86400000);
+  if (nights <= 0) return;
+  const rate  = roomRates[type] || 0;
+  const base  = rate * nights;
+  const svc   = Math.round(base*0.05);
+  const total = base + svc;
+  document.getElementById('ci-cost-preview').style.display = '';
+  document.getElementById('ci-cost-label').textContent = `${type} · ${nights} nights · Total: ${fmt(total)}`;
+}
+
+async function doCheckin() {
+  const fn   = document.getElementById('ci-fn').value.trim();
+  const ln   = document.getElementById('ci-ln').value.trim();
+  const type = document.getElementById('ci-room-type').value;
+  const ci   = document.getElementById('ci-in').value;
+  const co   = document.getElementById('ci-out').value;
+  if (!fn||!type||!ci||!co) { toast('⚠️ Please fill required fields','⚠️'); return; }
+
+  const g = await post('/api/guests', {
+    first_name: fn, last_name: ln,
+    phone: document.getElementById('ci-ph').value,
+    email: document.getElementById('ci-em').value,
+    dob:   document.getElementById('ci-dob').value,
+    anniversary: document.getElementById('ci-anniv').value,
+    id_number: document.getElementById('ci-id').value
+  });
+
+  const rooms = await get(`/api/rooms?type=${type}`);
+  const avail = rooms?.find(r => r.status === 'vacant');
+  if (!avail) { toast('⚠️ No vacant '+type+' rooms available','⚠️'); return; }
+
+  const bk = await post('/api/bookings', {
+    guest_id: g.id, room_id: avail.id,
+    checkin: ci, checkout: co,
+    guests_count: parseInt(document.getElementById('ci-guests').value)||1,
+    pay_method: document.getElementById('ci-pay').value,
+    deposit: parseFloat(document.getElementById('ci-deposit').value)||0,
+    notes: document.getElementById('ci-notes').value,
+    status: 'checkedin', source: 'walkin'
+  });
+
+  closeModal('modal-checkin');
+  toast(`✅ ${fn} ${ln} checked into Room ${avail.number}!`);
+  loadDashboard();
+  if (document.getElementById('pg-checkin').classList.contains('active')) loadCheckinPage();
+}
+
+async function loadCheckoutSummary() {
+  const bid = document.getElementById('co-booking').value;
+  if (!bid) return;
+  const b = await get(`/api/bookings/${bid}`);
+  if (!b) return;
+  document.getElementById('co-summary').style.display = '';
+  document.getElementById('co-lines').innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;"><span>Room ${b.room_number} · ${b.nights} nights</span><span style="font-weight:600">${fmt(b.subtotal)}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;"><span>Service charge</span><span>${fmt(b.service_fee)}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:.82rem;"><span>Deposit paid</span><span style="color:var(--sage)">- ${fmt(b.deposit)}</span></div>`;
+  document.getElementById('co-balance').textContent = fmt(b.balance);
+  document.getElementById('co-pay-amt').value = b.balance > 0 ? b.balance : '';
+}
+
+function openCheckoutFor(bid, name, balance) {
+  // Pre-populate checkout modal
+  const sel = document.getElementById('co-booking');
+  // rebuild options from current checked-in
+  get('/api/bookings?status=checkedin').then(bks => {
+    if (!bks) return;
+    sel.innerHTML = '<option value="">— Select —</option>' +
+      bks.map(b => `<option value="${b.id}" ${b.id===bid?'selected':''}>${b.guest_name} — Room ${b.room_number}</option>`).join('');
+    openModal('modal-checkout');
+    loadCheckoutSummary();
+  });
+}
+
+async function doCheckout() {
+  const bid = document.getElementById('co-booking').value;
+  if (!bid) { toast('⚠️ Please select a booking','⚠️'); return; }
+  const amt    = parseFloat(document.getElementById('co-pay-amt').value)||0;
+  const method = document.getElementById('co-pay-method').value;
+
+  const result = await post(`/api/bookings/${bid}/checkout`, {
+    payment_amount: amt, method: method
+  });
+  closeModal('modal-checkout');
+  toast('🧾 Receipt generated. Guest checked out!');
+  loadDashboard();
+  loadReceipts();
+  if (document.getElementById('pg-checkin').classList.contains('active')) loadCheckinPage();
+}
+
+/* ════════════════════════════════════════
+   RECEIPTS
+════════════════════════════════════════ */
+async function loadReceipts() {
+  const [recs, bks] = await Promise.all([get('/api/receipts'), get('/api/bookings?status=checkedin')]);
+  if (!recs) return;
+
+  // Populate booking dropdown in modal
+  if (bks) {
+    ['gr-booking','co-booking'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.innerHTML = '<option value="">— Select —</option>' +
+        bks.map(b => `<option value="${b.id}">${b.guest_name} — Room ${b.room_number}</option>`).join('');
+    });
+  }
+
+  document.getElementById('receipt-list').innerHTML = recs.map(r => `
+    <div class="receipt-list-item" onclick="showReceiptPreview(${JSON.stringify(r).replace(/"/g,'&quot;')})">
+      <div class="rli-left">
+        <div class="rli-icon">🧾</div>
+        <div><div class="rli-ref">${r.id}</div><div class="rli-name">${r.guest_name}</div></div>
+      </div>
+      <div class="rli-right">
+        <div class="rli-amt">${fmt(r.amount)}</div>
+        <div class="rli-date">${r.issued_at?.slice(0,10)||''}</div>
+        <div style="display:flex;gap:5px;margin-top:5px;">
+          <button class="btn btn-navy btn-xs" onclick="event.stopPropagation();toast('🖨️ Printing…')">🖨️</button>
+          <button class="btn btn-teal btn-xs" onclick="event.stopPropagation();toast('📧 Emailed!')">📧</button>
+        </div>
+      </div>
+    </div>`).join('') || '<div style="text-align:center;padding:20px;color:var(--text3)">No receipts yet</div>';
+}
+
+function showReceiptPreview(r) {
+  document.getElementById('rp-ref').textContent = r.id + ' · ' + (r.issued_at?.slice(0,10)||'');
+  document.getElementById('rp-info').innerHTML = `
+    <div class="rp-field"><div class="lbl">Guest</div><div class="val">${r.guest_name}</div></div>
+    <div class="rp-field"><div class="lbl">Email</div><div class="val">${r.email||'—'}</div></div>
+    <div class="rp-field"><div class="lbl">Check-In</div><div class="val">${r.checkin||'—'}</div></div>
+    <div class="rp-field"><div class="lbl">Check-Out</div><div class="val">${r.checkout||'—'}</div></div>
+    <div class="rp-field"><div class="lbl">Room</div><div class="val">Room ${r.room_number||'—'} · ${r.room_type||''}</div></div>
+    <div class="rp-field"><div class="lbl">Booking Ref</div><div class="val" style="font-family:monospace;font-size:.78rem;">${r.booking_id||'—'}</div></div>`;
+  document.getElementById('rp-lines').innerHTML = `
+    <div class="rp-line"><span>Room rate (${fmt(r.room_rate||0)} × ${r.nights||0} nights)</span><span>${fmt(r.subtotal)}</span></div>
+    <div class="rp-line"><span>Service charge (5%)</span><span>${fmt(r.service_fee)}</span></div>`;
+  document.getElementById('rp-total').innerHTML = `
+    <div class="rp-line" style="border-top:1px solid var(--border);padding-top:9px;margin-top:5px;"><span>Deposit paid</span><span style="color:var(--sage)">- ${fmt(r.deposit||0)}</span></div>
+    <div class="rp-line grand"><span>TOTAL PAID</span><span>${fmt(r.total_booking||r.amount)}</span></div>`;
+}
+
+async function genReceipt() {
+  const bid  = document.getElementById('gr-booking').value;
+  if (!bid) { toast('⚠️ Please select a booking','⚠️'); return; }
+  await post('/api/receipts', { booking_id: bid, type: document.getElementById('gr-type').value.toLowerCase().split(' ')[0] });
+  closeModal('modal-gen-receipt');
+  toast('🧾 Receipt generated!');
+  loadReceipts();
+}
+
+function emailReceipt() { toast('📧 Receipt emailed to guest!'); }
+
+/* ════════════════════════════════════════
+   CELEBRATIONS
+════════════════════════════════════════ */
+async function loadCelebrations() {
+  const d = await get('/api/celebrations');
+  if (!d) return;
+
+  const today_items  = [...d.birthdays, ...d.anniversaries].filter(x => x.when === 'today');
+  const month_items  = [...d.birthdays, ...d.anniversaries].filter(x => x.days_away <= 30);
+  document.getElementById('cs-today').textContent = today_items.length;
+  document.getElementById('cs-month').textContent = month_items.length;
+  document.getElementById('cs-sent').textContent  = d.log.length;
+
+  const makeCard = (items, id, type) => {
+    document.getElementById(id).innerHTML = items.slice(0,5).map((item,i) => {
+      const dateStr = type==='birthday' ? item.dob : item.anniversary;
+      const dayNum  = dateStr?.slice(8,10)||'?';
+      const monStr  = dateStr ? new Date(dateStr+'T00:00:00').toLocaleDateString('en',{month:'short'}).toUpperCase() : '';
+      return `<div class="celeb-full-card">
+        <div class="cfc-date-badge"><span class="day">${dayNum}</span>${monStr}</div>
+        <div class="cfc-icon ${type==='birthday'?'cfc-bday':'cfc-anniv'}">${type==='birthday'?'🎂':'💍'}</div>
+        <div><div class="cfc-name">${item.name}</div><div class="cfc-detail">${item.when==='today'?'🎉 Today! ':item.when} ${item.room_number?'· Room '+item.room_number:''}</div></div>
+        <div class="cfc-actions">
+          <button class="btn btn-primary btn-xs" onclick="sendCeleb('${item.id}','${type}')">Send Wish</button>
+        </div>
+      </div>`;
+    }).join('') || `<div style="text-align:center;padding:16px;color:var(--text3);font-size:.8rem;">No upcoming ${type==='birthday'?'birthdays':'anniversaries'}</div>`;
+  };
+
+  makeCard(d.birthdays,   'bday-list',  'birthday');
+  makeCard(d.anniversaries,'anniv-list','anniversary');
+}
+
+async function sendCeleb(guestId, type) {
+  await post('/api/celebrations/send', { guest_id: guestId, type, channel: 'whatsapp' });
+  toast(type==='birthday' ? '🎂 Birthday wish sent!' : '💍 Anniversary wish sent!');
+}
+
+/* ════════════════════════════════════════
+   REPORTS
+════════════════════════════════════════ */
+async function loadReports() {
+  const d = await get('/api/reports/summary');
+  if (!d) return;
+
+  // KPIs
+  const monthRev = d.monthly[d.monthly.length-1]?.revenue||0;
+  const totalBks = d.monthly.reduce((a,m)=>a+m.bookings,0);
+  const avgOcc   = d.occupancy_30d.length ? Math.round(d.occupancy_30d.reduce((a,x)=>a+x.rate,0)/d.occupancy_30d.length) : 0;
+  document.getElementById('rk-rev').textContent = fmt(monthRev);
+  document.getElementById('rk-occ').textContent = avgOcc+'%';
+  document.getElementById('rk-bks').textContent = totalBks;
+  document.getElementById('rk-arr').textContent = totalBks ? fmt(Math.round(monthRev/Math.max(totalBks,1))) : '—';
+
+  // Monthly chart
+  const maxRev = Math.max(...d.monthly.map(m=>m.revenue),1);
+  document.getElementById('revenue-chart').innerHTML = d.monthly.map((m,i) => `
+    <div class="mc-bar" style="height:${Math.round(m.revenue/maxRev*100)}%;background:${i===d.monthly.length-1?'var(--gold)':'var(--teal)'};opacity:${i===d.monthly.length-1?1:.75};" title="${fmt(m.revenue)}"></div>`).join('');
+  document.getElementById('revenue-labels').innerHTML = d.monthly.map(m =>
+    `<span style="font-size:.65rem;color:var(--text3)">${m.month}</span>`).join('');
+
+  // Occupancy chart
+  const maxOcc = Math.max(...d.occupancy_30d.map(x=>x.rate),1);
+  document.getElementById('occ-chart').innerHTML = d.occupancy_30d.map(x => `
+    <div class="mc-bar" style="height:${Math.round(x.rate/maxOcc*100)}%;background:${x.rate>80?'var(--rose)':x.rate>65?'var(--gold)':'var(--sage)'};border-radius:2px 2px 0 0;" title="${x.date}: ${x.rate}%"></div>`).join('');
+
+  // By room type
+  const maxTypeRev = Math.max(...d.by_room_type.map(x=>x.revenue),1);
+  document.getElementById('rev-by-type').innerHTML = d.by_room_type.map(t => `
+    <div class="chart-bar-item">
+      <div class="cbi-lbl">${t.type}</div>
+      <div class="cbi-track"><div class="cbi-fill" style="width:${Math.round(t.revenue/maxTypeRev*100)}%;background:linear-gradient(90deg,var(--teal),var(--teal2));color:rgba(255,255,255,.85);">${fmt(t.revenue)}</div></div>
+      <div class="cbi-val">${t.bookings}</div>
+    </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:.82rem;">No data</div>';
+
+  // By channel
+  const maxChanBks = Math.max(...d.by_channel.map(x=>x.bookings),1);
+  const chanColors = {online:'var(--navy)',walkin:'var(--sage)',phone:'var(--rose)'};
+  document.getElementById('rev-by-channel').innerHTML = d.by_channel.map(c => `
+    <div class="chart-bar-item">
+      <div class="cbi-lbl">${c.source}</div>
+      <div class="cbi-track"><div class="cbi-fill" style="width:${Math.round(c.bookings/maxChanBks*100)}%;background:${chanColors[c.source]||'var(--lavender)'};color:rgba(255,255,255,.85);">${c.bookings} bk</div></div>
+      <div class="cbi-val">${Math.round(c.bookings/maxChanBks*100)}%</div>
+    </div>`).join('') || '<div style="color:var(--text3);text-align:center;padding:20px;font-size:.82rem;">No data</div>';
+
+  // Top guests
+  document.getElementById('top-guests-body').innerHTML = d.top_guests.map((g,i) => `
+    <tr>
+      <td style="font-weight:700;color:${i===0?'var(--gold)':i===1?'var(--text3)':i===2?'#c8a860':'var(--text3)'};">${['🥇','🥈','🥉'][i]||'#'+(i+1)}</td>
+      <td><div class="name-cell">${avatar(g.name,i)}<div><div class="nc-main">${g.name}</div><div class="nc-sub">${g.email||''}</div></div></div></td>
+      <td>${g.stays}</td>
+      <td>${g.nights}</td>
+      <td style="font-weight:700;">${fmt(g.revenue)}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${g.last_visit||'—'}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">No data</td></tr>';
+}
+
+/* ════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════ */
+async function loadSettings() {
+  const s = await get('/api/settings');
+  if (!s) return;
+  if (s.hotel_name)  { document.getElementById('set-hotel-name').value  = s.hotel_name;  document.getElementById('sb-hotel-name').textContent = '🌴 '+s.hotel_name; }
+  if (s.hotel_address) document.getElementById('set-hotel-addr').value  = s.hotel_address;
+  if (s.hotel_phone)   document.getElementById('set-hotel-phone').value = s.hotel_phone;
+  if (s.hotel_email)   document.getElementById('set-hotel-email').value = s.hotel_email;
+  if (s.checkin_time)  document.getElementById('set-ci-time').value     = s.checkin_time;
+  if (s.checkout_time) document.getElementById('set-co-time').value     = s.checkout_time;
+  if (s.service_charge)document.getElementById('set-svc-charge').value  = s.service_charge;
+  if (s.vat)           document.getElementById('set-vat').value         = s.vat;
+  if (s.deposit_pct)   document.getElementById('set-deposit-pct').value = s.deposit_pct;
+  if (s.whatsapp_enabled) document.getElementById('set-whatsapp').checked = s.whatsapp_enabled === '1';
+  if (s.email_enabled)    document.getElementById('set-email').checked    = s.email_enabled    === '1';
+  if (s.sms_enabled)      document.getElementById('set-sms').checked      = s.sms_enabled      === '1';
+}
+
+async function saveSettings() {
+  await post('/api/settings', {
+    hotel_name:    document.getElementById('set-hotel-name').value,
+    hotel_address: document.getElementById('set-hotel-addr').value,
+    hotel_phone:   document.getElementById('set-hotel-phone').value,
+    hotel_email:   document.getElementById('set-hotel-email').value,
+    checkin_time:  document.getElementById('set-ci-time').value,
+    checkout_time: document.getElementById('set-co-time').value,
+    service_charge:document.getElementById('set-svc-charge').value,
+    vat:           document.getElementById('set-vat').value,
+    deposit_pct:   document.getElementById('set-deposit-pct').value,
+  });
+  toast('✅ Settings saved!');
+  loadSettings();
+}
+
+function settingsTab(el, id) {
+  document.querySelectorAll('.sn-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function selectSwatch(el) { document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); toast('🎨 Color theme updated!'); }
+
+/* ════════════════════════════════════════
+   MODALS / TOAST
+════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target===o) o.classList.remove('open'); }));
+
+let toastTm;
+function toast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon || '';
+  t.classList.add('show');
+  clearTimeout(toastTm);
+  toastTm = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+document.getElementById('ci-in').value  = today();
+document.getElementById('ci-out').value = tomorrow();
+document.getElementById('sw-ci').value  = today();
+document.getElementById('sw-co').value  = tomorrow();
+
+// Boot
+loadDashboard();
+loadRoomsMini();
+
+// Auto-refresh dashboard every 30 seconds
+setInterval(() => {
+  if (document.getElementById('pg-dashboard').classList.contains('active')) {
+    loadDashboard();
+  }
+}, 30000);
+</script>
+</body>
+</html>
