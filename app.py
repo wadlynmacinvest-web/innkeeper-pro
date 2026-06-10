@@ -164,6 +164,23 @@ def _seed():
         ('27','Standard',7500,2,0),('28','Standard',7500,2,0),
         ('29','Deluxe',12000,2,1),('30','Standard',7500,2,0),
     ]
+
+    guests = [
+        ('G-001', 'John', 'Doe', '+2348011223344', 'john.doe@example.com', '1985-05-15', '2010-10-10', 'A00123456'),
+        ('G-002', 'Jane', 'Smith', '+2348022334455', 'jane.smith@example.com', '1990-12-01', None, 'B99887766'),
+        ('G-003', 'Chidi', 'Okonkwo', '+2348033445566', 'chidi@example.com', '1980-08-20', '2015-06-12', 'C11223344')
+    ]
+
+    today = datetime.date.today()
+    tomorrow = today + datetime.timedelta(days=1)
+    next_week = today + datetime.timedelta(days=7)
+
+    bookings = [
+        (ref_id(), 'G-001', 1, today.isoformat(), tomorrow.isoformat(), 1, 2, 7500, 7500, 375, 7875, 5000, 2875, 'card', 'partial', 'checkedin', 'walkin', 'Needs extra pillows'),
+        (ref_id(), 'G-002', 5, tomorrow.isoformat(), next_week.isoformat(), 6, 1, 12000, 72000, 3600, 75600, 20000, 55600, 'transfer', 'partial', 'confirmed', 'ota', 'Allergic to peanuts'),
+        (ref_id(), 'G-003', 15, today.isoformat(), (today + datetime.timedelta(days=3)).isoformat(), 3, 2, 18000, 54000, 2700, 56700, 56700, 0, 'cash', 'paid', 'checkedin', 'walkin', 'VIP guest')
+    ]
+
     db = get_db()
     with db.cursor() as cur:
         cur.executemany("INSERT INTO rooms(number,type,rate,max_guests,breakfast) VALUES(%s,%s,%s,%s,%s)", rooms)
