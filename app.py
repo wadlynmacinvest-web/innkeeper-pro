@@ -164,6 +164,27 @@ def _seed():
         ('27','Standard',7500,2,0),('28','Standard',7500,2,0),
         ('29','Deluxe',12000,2,1),('30','Standard',7500,2,0),
     ]
+    # Demo guests
+    guests = [
+        ('g001','Kwame','Asante','+234 80 567 8901','kwame@email.com','1985-06-15','','NGA-12345'),
+        ('g002','Amara','Diallo','+225 07 654 3210','diallo@email.com','','2019-05-29','GHA-67890'),
+        ('g003','Amara','Osei','+233 20 987 6543','amara@email.com','1990-05-30','','GHA-11111'),
+        ('g004','Nkechi','Eze','+234 81 234 5678','nkechi@email.com','1992-08-12','','NGA-22222'),
+        ('g005','Fatima','Balde','+224 62 987 6543','fatima@email.com','','2021-12-03','GUI-33333'),
+    ]
+
+    today_dt = datetime.date.today()
+    d = lambda days: (today_dt + datetime.timedelta(days=days)).isoformat()
+
+    # Demo bookings
+    bookings = [
+        ('SPL-2026-0087','g001',14,d(-1),d(3),4,2,7500,30000,1500,31500,7500,24000,'card','paid','checkedin','online',''),
+        ('SPL-2026-0086','g002',8,d(-3),d(1),4,2,12000,48000,2400,50400,20000,30400,'bank','partial','checkedin','online','Anniversary trip'),
+        ('SPL-2026-0085','g003',12,d(-2),d(0),2,1,7500,15000,750,15750,0,15750,'cash','unpaid','checkedin','walkin','Birthday today!'),
+        ('SPL-2026-0084','g004',3,d(0),d(3),4,1,7500,30000,1500,31500,0,31500,'online','unpaid','pending','online',''),
+        ('SPL-2026-0083','g005',17,d(0),d(2),2,2,7500,15000,750,15750,15750,0,'momo','paid','confirmed','online',''),
+    ]
+
     db = get_db()
     with db.cursor() as cur:
         cur.executemany("INSERT INTO rooms(number,type,rate,max_guests,breakfast) VALUES(%s,%s,%s,%s,%s)", rooms)
@@ -203,6 +224,11 @@ def _seed():
     print("✅ Database seeded with demo data.")
 
 # ─── CORS & JSON helpers ────────────────────────────────────────────────────────
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled exception: {str(e)}", exc_info=True)
+    return err(str(e), 500)
 
 @app.after_request
 def add_cors(resp):
@@ -257,7 +283,7 @@ def dashboard():
         FROM guests g
         JOIN bookings b ON b.guest_id=g.id AND b.status='checkedin'
         JOIN rooms r ON r.id=b.room_id
-        WHERE to_char(g.dob::date, 'MM-DD')=to_char(CURRENT_DATE, 'MM-DD')
+        WHERE to_char(NULLIF(g.dob, '')::date, 'MM-DD')=to_char(CURRENT_DATE, 'MM-DD')
           AND g.dob != '' AND g.dob IS NOT NULL
     """)
     today_annivs = query("""
@@ -266,7 +292,7 @@ def dashboard():
         FROM guests g
         JOIN bookings b ON b.guest_id=g.id AND b.status='checkedin'
         JOIN rooms r ON r.id=b.room_id
-        WHERE to_char(g.anniversary::date, 'MM-DD')=to_char(CURRENT_DATE, 'MM-DD')
+        WHERE to_char(NULLIF(g.anniversary, '')::date, 'MM-DD')=to_char(CURRENT_DATE, 'MM-DD')
           AND g.anniversary != '' AND g.anniversary IS NOT NULL
     """)
 
@@ -605,24 +631,24 @@ def celebrations():
     days_ahead = int(request.args.get('days', 30))
     bdays = query("""
         SELECT g.id, g.first_name||' '||g.last_name name, g.email, g.phone, g.dob,
-               to_char(g.dob::date, 'MM-DD') md,
+               to_char(NULLIF(g.dob, '')::date, 'MM-DD') md,
                b.id booking_id, r.number room_number, b.status booking_status
         FROM guests g
         LEFT JOIN bookings b ON b.guest_id=g.id AND b.status='checkedin'
         LEFT JOIN rooms r ON r.id=b.room_id
         WHERE g.dob != '' AND g.dob IS NOT NULL
-        ORDER BY to_char(g.dob::date, 'MM-DD')
+        ORDER BY to_char(NULLIF(g.dob, '')::date, 'MM-DD')
     """)
 
     annivs = query("""
         SELECT g.id, g.first_name||' '||g.last_name name, g.email, g.phone, g.anniversary,
-               to_char(g.anniversary::date, 'MM-DD') md,
+               to_char(NULLIF(g.anniversary, '')::date, 'MM-DD') md,
                b.id booking_id, r.number room_number, b.status booking_status
         FROM guests g
         LEFT JOIN bookings b ON b.guest_id=g.id AND b.status='checkedin'
         LEFT JOIN rooms r ON r.id=b.room_id
         WHERE g.anniversary != '' AND g.anniversary IS NOT NULL
-        ORDER BY to_char(g.anniversary::date, 'MM-DD')
+        ORDER BY to_char(NULLIF(g.anniversary, '')::date, 'MM-DD')
     """)
 
     today_md = datetime.date.today().strftime('%m-%d')
@@ -746,4 +772,4 @@ if __name__ == '__main__':
     db_info = DATABASE_URL.split('@')[-1] if DATABASE_URL else "NOT SET"
     print(f"🗄️  Database at       {db_info}")
     print("⌨️  Press Ctrl+C to stop\n")
-    app.run(host='0.0.0.0', port=8081, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
