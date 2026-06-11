@@ -10,7 +10,9 @@ from psycopg2.extras import RealDictCursor
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # PostgreSQL connection string (set this in Vercel/environment)
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+
+print("DATABASE_URL =", repr(DATABASE_URL))
 STATIC   = os.path.join(BASE_DIR, 'static')
 
 app = Flask(__name__, static_folder=STATIC, static_url_path='')
@@ -22,7 +24,10 @@ def get_db():
     if db is None:
         if not DATABASE_URL:
             raise RuntimeError("DATABASE_URL environment variable is not set")
-        db = g._database = psycopg2.connect(DATABASE_URL)
+        db = g._database = psycopg2.connect(
+    DATABASE_URL,
+    sslmode="require"
+)
     return db
 
 @app.teardown_appcontext
