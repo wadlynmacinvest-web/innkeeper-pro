@@ -293,10 +293,21 @@ def catch_all(path):
     """Serve the frontend SPA for any non-API route."""
     if path.startswith('api/'):
         return jsonify(error='Not found'), 404
+    
+    # Resolve the absolute path to the requested file
     fp = os.path.join(STATIC, path)
+    
+    # If the file exists in static, serve it
     if path and os.path.exists(fp):
         return send_from_directory(STATIC, path)
-    return send_from_directory(STATIC, 'index.html')
+    
+    # Otherwise, fallback to index.html (Standard for SPA)
+    index_path = os.path.join(STATIC, 'index.html')
+    if os.path.exists(index_path):
+        return send_from_directory(STATIC, 'index.html')
+    
+    app.logger.error(f"404: Path '{path}' not found and index.html missing at {index_path}")
+    return "Application frontend not found. Please check your static folder.", 404
 
 def ok(data=None, **kw):
     payload = {'ok': True}
@@ -830,11 +841,3 @@ if __name__ == '__main__':
     print(f"🗄️  Database at       {db_info}")
     print("⌨️  Press Ctrl+C to stop\n")
     app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
-ro — Starting up…")
-    init_db()
-    print("🌐 Server running at http://0.0.0.0:8081")
-    print("📡 API available at  http://0.0.0.0:8081/api/")
-    db_info = DATABASE_URL.split('@')[-1] if DATABASE_URL else "NOT SET"
-    print(f"🗄️  Database at       {db_info}")
-    print("⌨️  Press Ctrl+C to stop\n")
-    app.run(host='0.0.0.0', port=8081, debug=False, threaded=True)
