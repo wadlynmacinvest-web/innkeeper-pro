@@ -822,6 +822,16 @@ if __name__ == '__main__':
     os.makedirs(STATIC, exist_ok=True)
     print("\n🏨 InnKeeper Pro — Starting up…")
     init_db()
+    
+    port = int(os.environ.get("PORT", 8081))
+    print(f"🌐 Server running at http://0.0.0.0:{port}")
+    print(f"📡 API available at  http://0.0.0.0:{port}/api/")
+    db_info = DATABASE_URL.split('@')[-1] if DATABASE_URL else "NOT SET"
+    print(f"🗄️  Database at       {db_info}")
+    print("⌨️  Press Ctrl+C to stop\n")
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
+ro — Starting up…")
+    init_db()
     print("🌐 Server running at http://0.0.0.0:8081")
     print("📡 API available at  http://0.0.0.0:8081/api/")
     db_info = DATABASE_URL.split('@')[-1] if DATABASE_URL else "NOT SET"
