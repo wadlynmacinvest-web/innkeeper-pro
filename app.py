@@ -829,10 +829,12 @@ def health():
 
 # ─── RUN ───────────────────────────────────────────────────────────────────────
 
+# Initialize database (Required for Gunicorn/Production)
+init_db()
+
 if __name__ == '__main__':
     os.makedirs(STATIC, exist_ok=True)
     print("\n🏨 InnKeeper Pro — Starting up…")
-    init_db()
     
     port = int(os.environ.get("PORT", 8081))
     print(f"🌐 Server running at http://0.0.0.0:{port}")
