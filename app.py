@@ -5,15 +5,19 @@ Full hotel management API with PostgreSQL database
 
 from flask import Flask, jsonify, request, send_from_directory, g
 import os, json, datetime, uuid, hashlib
-import psycopg2
-from psycopg2.extras import RealDictCursor
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    HAS_PG = True
+except ImportError:
+    HAS_PG = False
+import sqlite3
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # PostgreSQL connection string (set this in Vercel/environment)
 DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
-
-print("DATABASE_URL =", repr(DATABASE_URL))
-STATIC   = os.path.join(BASE_DIR, 'static')
+DB_PATH      = os.path.join(BASE_DIR, 'innkeeper.db')
+STATIC       = os.path.join(BASE_DIR, 'static')
 
 app = Flask(__name__, static_folder=STATIC, static_url_path='')
 
@@ -22,12 +26,15 @@ app = Flask(__name__, static_folder=STATIC, static_url_path='')
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        if not DATABASE_URL:
-            raise RuntimeError("DATABASE_URL environment variable is not set")
-        db = g._database = psycopg2.connect(
-    DATABASE_URL,
-    sslmode="require"
-)
+        if DATABASE_URL and HAS_PG:
+            db = g._database = psycopg2.connect(DATABASE_URL, sslmode="require")
+            g._is_pg = True
+        else:
+            db = g._database = sqlite3.connect(DB_PATH)
+            db.row_factory = sqlite3.Row
+            g._is_pg = False
+            # Enable foreign keys for SQLite
+            db.execute("PRAGMA foreign_keys = ON")
     return db
 
 @app.teardown_appcontext
@@ -35,21 +42,60 @@ def close_db(exc):
     db = getattr(g, '_database', None)
     if db: db.close()
 
+def sql_fix(sql, is_pg):
+    if is_pg: return sql
+    # Translate PostgreSQL to SQLite
+    sql = sql.replace('%s', '?')
+    sql = sql.replace('SERIAL PRIMARY KEY', 'INTEGER PRIMARY KEY AUTOINCREMENT')
+    sql = sql.replace('TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'DATETIME DEFAULT CURRENT_TIMESTAMP')
+    sql = sql.replace('paid_at::date', 'DATE(paid_at)')
+    sql = sql.replace("to_char(paid_at, 'YYYY-MM')", "strftime('%Y-%m', paid_at)")
+    sql = sql.replace("to_char(CURRENT_DATE, 'YYYY-MM')", "strftime('%Y-%m', 'now')")
+    sql = sql.replace("to_char(g.dob::date, 'MM-DD')", "strftime('%m-%d', g.dob)")
+    sql = sql.replace("to_char(NULLIF(g.dob, '')::date, 'MM-DD')", "strftime('%m-%d', NULLIF(g.dob, ''))")
+    sql = sql.replace("to_char(g.anniversary::date, 'MM-DD')", "strftime('%m-%d', g.anniversary)")
+    sql = sql.replace("to_char(NULLIF(g.anniversary, '')::date, 'MM-DD')", "strftime('%m-%d', NULLIF(g.anniversary, ''))")
+    sql = sql.replace("to_char(CURRENT_DATE, 'MM-DD')", "strftime('%m-%d', 'now')")
+    sql = sql.replace("to_char(created_at, 'YYYY-MM')", "strftime('%Y-%m', created_at)")
+    
+    # Handle ON CONFLICT
+    if 'ON CONFLICT (key) DO NOTHING' in sql:
+        sql = sql.replace('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT (key) DO NOTHING', 
+                          'INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)')
+    if 'ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value' in sql:
+        sql = sql.replace('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+                          'INSERT OR REPLACE INTO settings(key,value) VALUES(?,?)')
+    
+    return sql
+
 def query(sql, args=(), one=False):
-    conn = get_db()
-    with conn.cursor(cursor_factory=RealDictCursor) as cur:
-        cur.execute(sql, args)
+    db = get_db()
+    is_pg = getattr(g, '_is_pg', False)
+    sql = sql_fix(sql, is_pg)
+    if is_pg:
+        with db.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(sql, args)
+            rv = cur.fetchall()
+            results = [dict(r) for r in rv]
+    else:
+        cur = db.execute(sql, args)
         rv = cur.fetchall()
-        # Convert RealDictCursor objects to plain dicts for JSON serialization
         results = [dict(r) for r in rv]
-        return (results[0] if results else None) if one else results
+    
+    return (results[0] if results else None) if one else results
 
 def execute(sql, args=()):
-    conn = get_db()
-    with conn.cursor() as cur:
-        cur.execute(sql, args)
-        conn.commit()
-        return None
+    db = get_db()
+    is_pg = getattr(g, '_is_pg', False)
+    sql = sql_fix(sql, is_pg)
+    if is_pg:
+        with db.cursor() as cur:
+            cur.execute(sql, args)
+        db.commit()
+    else:
+        db.execute(sql, args)
+        db.commit()
+    return None
 
 def ref_id():
     return 'SPL-' + datetime.date.today().strftime('%Y') + '-' + str(uuid.uuid4())[:4].upper()
@@ -139,12 +185,18 @@ CREATE TABLE IF NOT EXISTS settings (
 def init_db():
     with app.app_context():
         db = get_db()
-        with db.cursor() as cur:
+        is_pg = getattr(g, '_is_pg', False)
+        if is_pg:
+            with db.cursor() as cur:
+                for stmt in SCHEMA.strip().split(';'):
+                    s = stmt.strip()
+                    if s: cur.execute(s)
+            db.commit()
+        else:
             for stmt in SCHEMA.strip().split(';'):
                 s = stmt.strip()
-                if s:
-                    cur.execute(s)
-        db.commit()
+                if s: db.execute(sql_fix(s, False))
+            db.commit()
         _seed()
 
 def _seed():
@@ -191,41 +243,34 @@ def _seed():
     ]
 
     db = get_db()
-    with db.cursor() as cur:
-        cur.executemany("INSERT INTO rooms(number,type,rate,max_guests,breakfast) VALUES(%s,%s,%s,%s,%s)", rooms)
-        cur.executemany("INSERT INTO guests(id,first_name,last_name,phone,email,dob,anniversary,id_number) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", guests)
-        
+    is_pg = getattr(g, '_is_pg', False)
+    if is_pg:
+        with db.cursor() as cur:
+            cur.executemany("INSERT INTO rooms(number,type,rate,max_guests,breakfast) VALUES(%s,%s,%s,%s,%s)", rooms)
+            cur.executemany("INSERT INTO guests(id,first_name,last_name,phone,email,dob,anniversary,id_number) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)", guests)
+            for b in bookings:
+                cur.execute("""INSERT INTO bookings(id,guest_id,room_id,checkin,checkout,nights,guests_count,
+                              room_rate,subtotal,service_fee,total,deposit,balance,pay_method,pay_status,status,source,notes)
+                              VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", b)
+                status_map = {'checkedin':'occupied','pending':'reserved','confirmed':'reserved'}
+                cur.execute("UPDATE rooms SET status=%s WHERE id=%s", (status_map.get(b[15],'vacant'), b[2]))
+            cur.execute("UPDATE rooms SET status='maintenance' WHERE number IN ('09','29')")
+            settings = [('hotel_name','Sunrise Palms Inn'),('hotel_address','12 Marina Road, Lagos, Nigeria'),('hotel_phone','+234 80 000 0000'),('hotel_email','info@sunrisepalms.com'),('checkin_time','14:00'),('checkout_time','12:00'),('currency','NGN'),('service_charge','5'),('vat','7.5'),('deposit_pct','30'),('auto_birthday','1'),('auto_anniversary','1'),('whatsapp_enabled','1'),('email_enabled','1'),('sms_enabled','0')]
+            cur.executemany("INSERT INTO settings(key,value) VALUES(%s,%s) ON CONFLICT (key) DO NOTHING", settings)
+        db.commit()
+    else:
+        db.executemany("INSERT INTO rooms(number,type,rate,max_guests,breakfast) VALUES(?,?,?,?,?)", rooms)
+        db.executemany("INSERT INTO guests(id,first_name,last_name,phone,email,dob,anniversary,id_number) VALUES(?,?,?,?,?,?,?,?)", guests)
         for b in bookings:
-            cur.execute("""INSERT INTO bookings(id,guest_id,room_id,checkin,checkout,nights,guests_count,
+            db.execute("""INSERT INTO bookings(id,guest_id,room_id,checkin,checkout,nights,guests_count,
                           room_rate,subtotal,service_fee,total,deposit,balance,pay_method,pay_status,status,source,notes)
-                          VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", b)
-            # update room status
+                          VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", b)
             status_map = {'checkedin':'occupied','pending':'reserved','confirmed':'reserved'}
-            cur.execute("UPDATE rooms SET status=%s WHERE id=%s", (status_map.get(b[15],'vacant'), b[2]))
-
-        # Some rooms to maintenance
-        cur.execute("UPDATE rooms SET status='maintenance' WHERE number IN ('09','29')")
-
-        # Settings defaults
-        settings = [
-            ('hotel_name','Sunrise Palms Inn'),
-            ('hotel_address','12 Marina Road, Lagos, Nigeria'),
-            ('hotel_phone','+234 80 000 0000'),
-            ('hotel_email','info@sunrisepalms.com'),
-            ('checkin_time','14:00'),
-            ('checkout_time','12:00'),
-            ('currency','NGN'),
-            ('service_charge','5'),
-            ('vat','7.5'),
-            ('deposit_pct','30'),
-            ('auto_birthday','1'),
-            ('auto_anniversary','1'),
-            ('whatsapp_enabled','1'),
-            ('email_enabled','1'),
-            ('sms_enabled','0'),
-        ]
-        cur.executemany("INSERT INTO settings(key,value) VALUES(%s,%s) ON CONFLICT (key) DO NOTHING", settings)
-    db.commit()
+            db.execute("UPDATE rooms SET status=? WHERE id=?", (status_map.get(b[15],'vacant'), b[2]))
+        db.execute("UPDATE rooms SET status='maintenance' WHERE number IN ('09','29')")
+        settings = [('hotel_name','Sunrise Palms Inn'),('hotel_address','12 Marina Road, Lagos, Nigeria'),('hotel_phone','+234 80 000 0000'),('hotel_email','info@sunrisepalms.com'),('checkin_time','14:00'),('checkout_time','12:00'),('currency','NGN'),('service_charge','5'),('vat','7.5'),('deposit_pct','30'),('auto_birthday','1'),('auto_anniversary','1'),('whatsapp_enabled','1'),('email_enabled','1'),('sms_enabled','0')]
+        db.executemany("INSERT OR IGNORE INTO settings(key,value) VALUES(?,?)", settings)
+        db.commit()
     print("✅ Database seeded with demo data.")
 
 # ─── CORS & JSON helpers ────────────────────────────────────────────────────────
@@ -751,9 +796,14 @@ def settings_api():
 
     d = request.json or {}
     db = get_db()
-    with db.cursor() as cur:
+    is_pg = getattr(g, '_is_pg', False)
+    if is_pg:
+        with db.cursor() as cur:
+            for k, v in d.items():
+                cur.execute("INSERT INTO settings(key,value) VALUES(%s,%s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", (k, str(v)))
+    else:
         for k, v in d.items():
-            cur.execute("INSERT INTO settings(key,value) VALUES(%s,%s) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", (k, str(v)))
+            db.execute("INSERT OR REPLACE INTO settings(key,value) VALUES(?,?)", (k, str(v)))
     db.commit()
     return ok({'updated': len(d)})
 
@@ -772,9 +822,9 @@ if __name__ == '__main__':
     os.makedirs(STATIC, exist_ok=True)
     print("\n🏨 InnKeeper Pro — Starting up…")
     init_db()
-    print("🌐 Server running at http://0.0.0.0:8080")
-    print("📡 API available at  http://0.0.0.0:8080/api/")
+    print("🌐 Server running at http://0.0.0.0:8081")
+    print("📡 API available at  http://0.0.0.0:8081/api/")
     db_info = DATABASE_URL.split('@')[-1] if DATABASE_URL else "NOT SET"
     print(f"🗄️  Database at       {db_info}")
     print("⌨️  Press Ctrl+C to stop\n")
-    app.run(host='0.0.0.0', port=8080, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=8081, debug=False, threaded=True)
