@@ -822,8 +822,10 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 <script>
 /* ════════════════════════════════════════
    API HELPERS
+   Note: On mobile/Capacitor, we must use the full production URL.
 ════════════════════════════════════════ */
-const API = '';  // same origin
+const PROD_URL = 'https://innkeeper-pro.onrender.com';
+const API = (window.location.origin.includes('localhost') && !window.hasOwnProperty('Capacitor')) ? '' : PROD_URL;
 
 async function api(path, opts = {}) {
   try {
