@@ -4,7 +4,7 @@ Full hotel management API with PostgreSQL database
 """
 
 from flask import Flask, jsonify, request, send_from_directory, g
-import os, json, datetime, uuid, hashlib
+import os, json, datetime, uuid, hashlib, decimal
 try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
@@ -27,8 +27,12 @@ def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         if DATABASE_URL and HAS_PG:
-            db = g._database = psycopg2.connect(DATABASE_URL, sslmode="require")
-            g._is_pg = True
+            try:
+                db = g._database = psycopg2.connect(DATABASE_URL, sslmode="require")
+                g._is_pg = True
+            except Exception as e:
+                app.logger.error(f"❌ PostgreSQL Connection Error: {str(e)}")
+                raise
         else:
             db = g._database = sqlite3.connect(DB_PATH)
             db.row_factory = sqlite3.Row
@@ -68,33 +72,56 @@ def sql_fix(sql, is_pg):
     
     return sql
 
+def json_serializable(data):
+    """Recursively convert Decimal and Date objects to JSON-safe formats."""
+    if isinstance(data, list):
+        return [json_serializable(item) for item in data]
+    if isinstance(data, dict):
+        return {k: json_serializable(v) for k, v in data.items()}
+    if isinstance(data, decimal.Decimal):
+        return float(data)
+    if isinstance(data, (datetime.date, datetime.datetime)):
+        return data.isoformat()
+    return data
+
 def query(sql, args=(), one=False):
     db = get_db()
     is_pg = getattr(g, '_is_pg', False)
     sql = sql_fix(sql, is_pg)
-    if is_pg:
-        with db.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, args)
+    try:
+        if is_pg:
+            with db.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(sql, args)
+                rv = cur.fetchall()
+                results = [dict(r) for r in rv]
+        else:
+            cur = db.execute(sql, args)
             rv = cur.fetchall()
             results = [dict(r) for r in rv]
-    else:
-        cur = db.execute(sql, args)
-        rv = cur.fetchall()
-        results = [dict(r) for r in rv]
-    
-    return (results[0] if results else None) if one else results
+        
+        results = json_serializable(results)
+        return (results[0] if results else None) if one else results
+    except Exception as e:
+        app.logger.error(f"Database Query Error: {str(e)}\nSQL: {sql}")
+        if is_pg: db.rollback()
+        raise
 
 def execute(sql, args=()):
     db = get_db()
     is_pg = getattr(g, '_is_pg', False)
     sql = sql_fix(sql, is_pg)
-    if is_pg:
-        with db.cursor() as cur:
-            cur.execute(sql, args)
-        db.commit()
-    else:
-        db.execute(sql, args)
-        db.commit()
+    try:
+        if is_pg:
+            with db.cursor() as cur:
+                cur.execute(sql, args)
+            db.commit()
+        else:
+            db.execute(sql, args)
+            db.commit()
+    except Exception as e:
+        app.logger.error(f"Database Execute Error: {str(e)}\nSQL: {sql}")
+        if is_pg: db.rollback()
+        raise
     return None
 
 def ref_id():
@@ -183,21 +210,29 @@ CREATE TABLE IF NOT EXISTS settings (
 """
 
 def init_db():
+    print("⏳ Initializing database...")
     with app.app_context():
-        db = get_db()
-        is_pg = getattr(g, '_is_pg', False)
-        if is_pg:
-            with db.cursor() as cur:
+        try:
+            db = get_db()
+            is_pg = getattr(g, '_is_pg', False)
+            if is_pg:
+                with db.cursor() as cur:
+                    for stmt in SCHEMA.strip().split(';'):
+                        s = stmt.strip()
+                        if s: cur.execute(s)
+                db.commit()
+                print("✅ PostgreSQL tables verified/created.")
+            else:
                 for stmt in SCHEMA.strip().split(';'):
                     s = stmt.strip()
-                    if s: cur.execute(s)
-            db.commit()
-        else:
-            for stmt in SCHEMA.strip().split(';'):
-                s = stmt.strip()
-                if s: db.execute(sql_fix(s, False))
-            db.commit()
-        _seed()
+                    if s: db.execute(sql_fix(s, False))
+                db.commit()
+                print("✅ SQLite tables verified/created.")
+            _seed()
+        except Exception as e:
+            print(f"❌ Database Initialization Failed: {str(e)}")
+            app.logger.error(f"Database Initialization Failed: {str(e)}", exc_info=True)
+            pass
 
 def _seed():
     """Insert demo data if tables are empty."""
@@ -546,7 +581,7 @@ def booking_detail(bid):
     if not b: return err('Booking not found', 404)
 
     if request.method == 'GET':
-        pmts = query("SELECT * FROM payments WHERE booking_id=%s ORDER BY paid_at DESC", (bid,))
+        pmts = query("SELECT * FROM payments WHERE booking_id=%s ORDER BY PAID_at DESC", (bid,))
         recs = query("SELECT * FROM receipts WHERE booking_id=%s ORDER BY issued_at DESC", (bid,))
         return ok({**b, 'payments': pmts, 'receipts': recs})
 
