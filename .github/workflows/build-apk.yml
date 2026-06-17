@@ -1,64 +1,53 @@
+name: Build and Release APK
 
-  1 name: Build and Release APK
-    2
-    3 on:
-    4   push:
-    5     branches: [ "main", "master" ]
-    6   workflow_dispatch:
-    7
-    8 jobs:
-    9   build:
-   10     runs-on: ubuntu-latest
-   11
-   12     steps:
-   13       - name: Checkout Code
-   14         uses: actions/checkout@v4
-   15
-   16       - name: Set up Java
-   17         uses: actions/setup-java@v4
-   18         with:
-   19           java-version: '17'
-   20           distribution: 'temurin'
-   21
-   22       - name: Set up Node.js
-   23         uses: actions/setup-node@v4
-   24         with:
-   25           node-version: '20'
-   26           cache: 'npm'
-   27           cache-dependency-path: static/package-lock.json
-   28
-   29       - name: Install Frontend Dependencies
-   30         working-directory: static
-   31         run: npm ci
-   32
-   33       - name: Prepare Web Directory
-   34         working-directory: static
-   35         run: |
-   36           mkdir -p www
-   37           cp index.html www/
-   38
-   39       - name: Capacitor Sync
-   40         working-directory: static
-   41         run: |
-   42           chmod +x ./node_modules/.bin/cap
-   43           npx cap sync android
-   44
-   45       - name: Build Android APK (Debug)
-   46         working-directory: static/android
-   47         run: |
-   48           chmod +x gradlew
-   49           ./gradlew assembleDebug
-   50
-   51       - name: Create Release
-   52         id: create_release
-   53         uses: softprops/action-gh-release@v1
-   54         if: startsWith(github.ref, 'refs/heads/')
-   55         with:
-   56           tag_name: v${{ github.run_number }}
-   57           name: Release v${{ github.run_number }}
-   58           draft: false
-   59           prerelease: false
-   60           files: static/android/app/build/outputs/apk/debug/app-debug.apk
-   61         env:
-   62           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies
+        working-directory: static
+        run: npm install
+
+      - name: Prepare Web Directory
+        working-directory: static
+        run: |
+          mkdir -p www
+          cp index.html www/
+
+      - name: Capacitor Sync
+        working-directory: static
+        run: npx cap sync android
+
+      - name: Build Android APK
+        working-directory: static/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: static/android/app/build/outputs/apk/debug/app-debug.apk
