@@ -37,8 +37,10 @@ jobs:
           cp index.html www/
 
       - name: Capacitor Sync
-        working-directory: static
-        run: npx cap sync android
+  working-directory: static
+  run: npx @capacitor/cli sync android
+  
+
 
       - name: Build Android APK
         working-directory: static/android
